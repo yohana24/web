@@ -1,3 +1,10 @@
+<?php
+session_start();
+if(!isset($_SESSION['user_id'])){
+header("Location: index.php");
+exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,14 +38,15 @@
                         <li><a href="about.php">About</a></li>
                         <li><a href="Contact Us.php">Contact</a></li>
                         <li><a href="my_orders.php">My Orders</a></li>
-                        <!-- ===== logout ===== -->
-                        <li class="li"><a href="index.php">LOGOUT</a></li>
+                        <li class="li"><a href="logout.php">LOGOUT</a></li>
                     </ul>
+
                     <!-- ===== search ===== -->
                 <div class="search">
                     <div class="search_icon"><i class="ri-search-line"></i></div>
                     <input type="text" class="search_input" placeholder="Search">
                 </div>
+
                 <!-- ===== cart ===== -->
                 <div class="cart" onclick="toggleCart()">
                     <i class="ri-shopping-basket-2-line"></i>
@@ -47,11 +55,13 @@
             </nav>
         </div>
     </header>
-    <!-- ===== text neon left side===== -->
+
+    <!-- ===== الجزء اللي على الشمال ===== -->
     <div class="left">
         <h1 class="title">THE NAME</h1>
         <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eum eos inventore earum qui, animi ipsum ipsa esse laudantium possimus molestias quos natus? Corporis vitae cumque modi impedit. Eum, magnam natus.</p>
-        <!-- ===== button Order now neon ===== -->
+        
+        <!-- ===== زرار order now ===== -->
         <div class="under">
             <a href="products.php" class="neon">
                 <span></span>
@@ -62,9 +72,11 @@
             </a>
         </div>
     </div>
-    <!-- ===== images neon right side ===== -->
+    
+    <!-- ===== الجزء اليمين  ===== -->
     <div class="right">
         <div class="neon-frame">
+                <!-- =====  الصور  ===== -->
             <img src="burger.png" class="food active" alt="burger">
             <img src="juice.png" class="food" alt="juice">
             <img src="pizza.png" class="food" alt="pizza">

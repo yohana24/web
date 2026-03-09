@@ -1,46 +1,70 @@
 <?php
-session_start();
-include 'db.php';
+session_start();        
 
-$name = $_POST['username'] ?? '';
-$email = $_POST['email'] ?? '';
+include 'db.php';   
+
+// ============================
+// بنجيب البيانات من الفورم
+// ============================
+$name     = $_POST['username'] ?? '';
+$email    = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
-$confirm = $_POST['confirm_password'] ?? '';
+$confirm  = $_POST['confirm_password'] ?? '';
 
-if(!$name || !$email || !$password || !$confirm){
+// ============================
+// التأكد إن الخانات مش فاضية 
+// ============================
+if (!$name || !$email || !$password || !$confirm) {
     echo json_encode(['success'=>false, 'message'=>"Please fill all fields"]);
     exit();
 }
 
-if($password !== $confirm){
+// ============================
+// التأكد إن الباس متطابق
+// ============================
+if ($password !== $confirm) {
     echo json_encode(['success'=>false, 'message'=>"Passwords do not match"]);
     exit();
 }
 
+// ============================
+//  تشفير الباس قبل التخزين
+// ============================
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
+// ============================
+// التأكد إن الايميل مش مسجل قبل كده
+// ============================
 $stmt = $conn->prepare("SELECT user_id FROM users WHERE email=?");
-$stmt->bind_param("s", $email);
+$stmt->bind_param("s", $email); // بنحط الايميل بدل الـ ?
 $stmt->execute();
 $stmt->store_result();
 
-if($stmt->num_rows > 0){
+if ($stmt->num_rows > 0) {
     echo json_encode(['success'=>false, 'message'=>"Email already registered"]);
     exit();
 }
 
+// ============================
+// لو كل حاجة تمام، نسجل المستخدم
+// ============================
+
 // role افتراضي customer
 $role = 'customer';
-$stmt2 = $conn->prepare("INSERT INTO users (name,email,password,role) VALUES (?,?,?,?)");
-$stmt2->bind_param("ssss", $name, $email, $hashed_password, $role);
 
-if($stmt2->execute()){
-    $_SESSION['user_id'] = $stmt2->insert_id;
+$stmt2 = $conn->prepare("INSERT INTO users (name,email,password,role) VALUES (?,?,?,?)"); //بنجهز أمر SQL عشان ندخل بيانات مستخدم جديد في جدول users
+$stmt2->bind_param("ssss", $name, $email, $hashed_password, $role);          //هنا بنربط الـ placeholders اللي في الاستعلام بالمتغيرات الحقيقية.
+
+if ($stmt2->execute()) {
+    // بنخزن بيانات المستخدم فى الجلسة
+    $_SESSION['user_id']   = $stmt2->insert_id;
     $_SESSION['user_name'] = $name;
-    $_SESSION['role'] = $role;
+    $_SESSION['role']      = $role;
 
+    // بنرجع رسالة نجاح
     echo json_encode(['success'=>true, 'role'=>$role]);
 } else {
+    // لو فى مشكلة فى تسجيل المستخدم
     echo json_encode(['success'=>false, 'message'=>$conn->error]);
 }
 ?>

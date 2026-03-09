@@ -1,40 +1,48 @@
-const foods=document.querySelectorAll(".food");
+// ============================
+// الصور اللي بتتغير
+// ============================
 
-let index=0;
+const foods = document.querySelectorAll(".food");
 
-setInterval(()=>{
+let index = 0;
 
-foods[index].classList.remove("active");
+setInterval(() => {
 
-index++;
+    // بشيل ال active  من الصورة الحالية
+    foods[index].classList.remove("active");
 
-if(index>=foods.length){
+    // بروح للصورة اللي بعدها
+    index++;
 
-index=0;
+    // لما بوصل ل اخر صورة ابدء من جديد
+    if (index >= foods.length) {
+        index = 0;
+    }
 
-}
+    // بحط ال active على الصورة الجديدة
+    foods[index].classList.add("active");
 
-foods[index].classList.add("active");
+    //مدة عرض الصورة الواحدة
+}, 7000);
 
-},3500);
 
+// ============================
+// الشكل اللي حوالين الصورة
+// ============================
 
-/* sparks */
+//بستدعى ال frame  
+const frame = document.querySelector(".neon-frame");
 
-const frame=document.querySelector(".neon-frame");
+for (let i = 0; i < 10; i++) {                            //عدد الشرارات = قوة التأثير
 
-for(let i=0;i<10;i++){
+    let spark = document.createElement("div");            //بعمل <div></div>
 
-let s=document.createElement("div");
+    spark.className = "spark";                            //<div class = "spark"></div>
 
-s.className="spark";
+    spark.style.top = Math.random() * 100 + "%";          //تحديد مكان عشوائى من 0% ل 100% بس
+    spark.style.left = Math.random() * 100 + "%";
 
-s.style.top=Math.random()*100+"%";
+    spark.style.animationDelay = Math.random() * 5 + "s"; //كل شرارة تبدأ الحركة فى وقت مختلف
 
-s.style.left=Math.random()*100+"%";
-
-s.style.animationDelay=Math.random()*5+"s";
-
-frame.appendChild(s);
-
+    frame.appendChild(spark);                             //كل شرارة جوا neon-frame
 }
