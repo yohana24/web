@@ -1,5 +1,6 @@
 <?php
 session_start();
-session_destroy();                          //بمسح كل بيانات الجلسة 
-header("Location: index.php");
+session_destroy();
+header("Location: login.php");
+exit;
 ?>

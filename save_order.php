@@ -2,6 +2,18 @@
 session_start();
 include 'db.php';
 
+// رقم الترابيزة محفوظ من login.php بعد مسح QR
+$table_id = $_SESSION['table_id'] ?? null;
+
+// منع الطلب لو ما فيش table_id
+if(!$table_id){
+    echo json_encode([
+        'success'=>false,
+        'message'=>'Please scan table QR code first'
+    ]);
+    exit;
+}
+
 // ===== تحديد نوع المحتوى للرد بالـ JSON =====
 header('Content-Type: application/json');
 
@@ -33,17 +45,15 @@ foreach($cart as $item){
     $product_id = $item['product_id'];
     $qty = $item['quantity'];
 
-    // تجهيز استعلام للتحقق من الكمية في الجدول
     $check = $conn->prepare("SELECT stock_quantity FROM products WHERE product_id=?");
     $check->bind_param("i",$product_id);
     $check->execute();
     $res = $check->get_result()->fetch_assoc();
 
-    // إذا المنتج مش موجود أو الكمية غير كافية
     if(!$res || $res['stock_quantity'] < $qty){
         echo json_encode([
             'success'=>false,
-            'message'=>'Product '.$item['name'].' out of stock' // رسالة الخطأ
+            'message'=>'Product '.$item['name'].' out of stock'
         ]);
         exit;
     }
@@ -55,29 +65,34 @@ foreach($cart as $i){
     $total += $i['price'] * $i['quantity'];
 }
 
-// ===== إنشاء رقم الطلب الفريد =====
+// ===== إنشاء رقم الطلب الفريد مع الميلي ثانية لتجنب التكرار =====
 date_default_timezone_set('Africa/Cairo'); // وقت القاهرة المحلي
 
 do {
-    $order_number = 'ORD_' . date('Y-m-d_H-i-s') . '_' . rand(100,999);
+    $order_number = 'ORD_' . date('Y-m-d_H-i-s') . '_' . round(microtime(true) * 1000);
 
     $check_stmt = $conn->prepare("SELECT order_id FROM orders WHERE order_number=?");
     $check_stmt->bind_param("s", $order_number);
     $check_stmt->execute();
     $check_res = $check_stmt->get_result();
-} while($check_res->num_rows > 0); // استمر إذا الرقم موجود مسبقًا
+} while($check_res->num_rows > 0);
 
 // ===== إدخال الطلب في جدول orders =====
+$status = "Pending";
+
 $stmt = $conn->prepare(
-    "INSERT INTO orders
-    (user_id,order_number,total_amount,status,created_at)
-    VALUES(?,?,?,'Pending',NOW())"
+    "INSERT INTO orders (user_id, table_id, order_number, total_amount, status, created_at)
+     VALUES (?, ?, ?, ?, ?, NOW())"
 );
+
+// ===== تصحيح bind_param =====
 $stmt->bind_param(
-    "isd",
-    $user_id,       // معرف المستخدم
-    $order_number,  // رقم الطلب
-    $total          // المجموع الكلي
+        "iisds",
+    $user_id,
+    $table_id,
+    $order_number,
+    $total,
+    $status
 );
 
 if(!$stmt->execute()){
@@ -87,7 +102,8 @@ if(!$stmt->execute()){
     ]);
     exit;
 }
-$order_id = $conn->insert_id; // أخذ رقم الطلب اللي اتسجل
+
+$order_id = $conn->insert_id; // رقم الطلب الجديد
 
 // ===== إدخال المنتجات في جدول order_items =====
 $item_stmt = $conn->prepare(
@@ -97,18 +113,18 @@ $item_stmt = $conn->prepare(
 );
 
 foreach($cart as $item){
-    $subtotal = $item['price'] * $item['quantity']; // حساب المجموع لكل منتج
-    $note = $item['note'] ?? ""; // الملاحظات (اختيارية)
+    $subtotal = $item['price'] * $item['quantity'];
+    $note = $item['note'] ?? "";
 
     $item_stmt->bind_param(
         "iiidds",
-        $order_id,          // رقم الطلب
-        $item['product_id'],// معرف المنتج
-        $item['quantity'],  // الكمية
-        $item['price'],     // سعر الوحدة
-        $subtotal,          // المجموع
-        $note               // الملاحظة
-    );
+        $order_id,
+        $item['product_id'],
+        $item['quantity'],
+        $item['price'],
+        $subtotal,
+        $note
+);
     $item_stmt->execute();
 
     // ===== خصم الكمية من المخزن =====
@@ -120,7 +136,6 @@ foreach($cart as $item){
 // ===== إرسال الرد النهائي للـ JS =====
 echo json_encode([
     'success'=>true,
-    'order_number'=>$order_number // رقم الطلب لتأكيده في الواجهة
+    'order_number'=>$order_number
 ]);
-
 ?>

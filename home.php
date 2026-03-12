@@ -4,6 +4,8 @@ if(!isset($_SESSION['user_id'])){
 header("Location: index.php");
 exit();
 }
+include 'auth_check.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -1,6 +1,8 @@
 <?php
 session_start();
 include 'db.php';
+include 'auth_check.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

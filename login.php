@@ -1,6 +1,17 @@
 <?php
+ini_set('session.gc_maxlifetime', 86400); // 24 ساعة
+session_set_cookie_params(86400);
 session_start();
+include 'auth_check.php';
+
 include 'db.php';
+// ==== QR scan فقط ====
+if(isset($_GET['table_id']) && empty($_POST)){
+    $_SESSION['table_id'] = $_GET['table_id'];
+    // Redirect مباشرة لصفحة تسجيل الدخول
+    header("Location: index.php"); // صفحة الفورم
+    exit;
+}
 
 // ===== نجيب البيانات اللي المستخدم دخلها من الفورم =====
 $email = $_POST['email'] ?? '';

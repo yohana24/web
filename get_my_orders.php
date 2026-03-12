@@ -2,36 +2,34 @@
 session_start();
 include 'db.php';
 header('Content-Type: application/json');
+include 'auth_check.php';
 
-$user_id = $_SESSION['user_id'];
+// ===== جلب كل الأوردرات مع رقم الترابيزة واسم المستخدم =====
+$sql = "
+    SELECT o.order_id, o.order_number, o.status, o.total_amount, o.created_at,
+           t.table_number, u.name AS customer_name
+    FROM orders o
+    JOIN tables t ON o.table_id = t.table_id
+    JOIN users u ON o.user_id = u.user_id
+    ORDER BY o.created_at DESC
+";
 
-// جلب كل الأوردرات للمستخدم
-$stmt = $conn->prepare("
-    SELECT order_id, order_number, status, total_amount, created_at
-    FROM orders 
-    WHERE user_id=? 
-    ORDER BY created_at DESC
-");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
+$result = $conn->query($sql);
 $orders = [];
 
 while($row = $result->fetch_assoc()){
     // جلب تفاصيل المنتجات لكل أوردر
     $items_res = $conn->query("
-SELECT 
-products.name AS product_name,
-order_items.quantity,
-order_items.price,
-order_items.subtotal,
-order_items.note
-FROM order_items
-JOIN products 
-ON order_items.product_id = products.product_id
-WHERE order_items.order_id = ".$row['order_id']."
-");
+        SELECT 
+            products.name AS product_name,
+            order_items.quantity,
+            order_items.price,
+            order_items.subtotal,
+            order_items.note
+        FROM order_items
+        JOIN products ON order_items.product_id = products.product_id
+        WHERE order_items.order_id = ".$row['order_id']."
+    ");
 
     $items = [];
     while($item = $items_res->fetch_assoc()){

@@ -10,9 +10,11 @@ $result = $conn->query("
         orders.total_amount,
         orders.status,
         orders.created_at,
-        users.name
+        users.name AS customer_name,
+        tables.table_number
     FROM orders
     JOIN users ON orders.user_id = users.user_id
+    JOIN tables ON orders.table_id = tables.table_id
     ORDER BY orders.created_at DESC
 ");
 
@@ -42,3 +44,4 @@ while($row = $result->fetch_assoc()){
 }
 
 echo json_encode($orders);
+?>

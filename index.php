@@ -1,9 +1,13 @@
 <?php
 // ===== نبدأ الجلسة =====
 session_start();
-
+if(isset($_GET['table_id'])){
+    $_SESSION['table_id'] = $_GET['table_id'];
+}
 // ===== علشان نوصل لقاعدة البيانات  =====
 include 'db.php';
+include 'auth_check.php';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,6 +78,12 @@ include 'db.php';
     </div>
 
     <!-- ===== جافاسكربت ===== -->
+         <script>
+<?php if(isset($_SESSION['table_id'])): ?>
+    sessionStorage.setItem('table_id', "<?php echo $_SESSION['table_id']; ?>");
+<?php endif; ?>
+</script>
     <script src="login.js"></script>
+
 </body>
 </html>

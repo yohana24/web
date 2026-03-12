@@ -1,6 +1,7 @@
 <?php
 	session_start();
 	include 'db.php';
+include 'auth_check.php';
 
 	// التأكد إن المستخدم عامل تسجيل دخول
 	if (!isset($_SESSION['user_id'])) {
@@ -53,13 +54,13 @@
 					</div>
 
 					<ul class="nav-links">
-
+						<li><a href="home.php">Home</a></li>
 						<li><a href="products.php">Menu</a></li>
 						<li><a href="about.php">About</a></li>
 						<li><a href="Contact Us.php">Contact</a></li>
 						<li><a href="my_orders.php">My Orders</a></li>
 						<li class="li"><a href="index.php">LOGOUT</a></li>
-						<li><a href="home.php">Home</a></li>
+						
 
 					</ul>
 

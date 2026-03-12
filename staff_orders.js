@@ -40,17 +40,19 @@ function loadOrders(){
             // Build Card
             container.innerHTML += `
                 <div class="order-card">
-                    <div class="order-header">
-                        <div>
-                            <span class="order-number">Order #${order.order_number}</span>
-                            <div class="customer-name">${order.name}</div>
-                        </div>
-                        <span class="order-status ${statusClass}">${order.status}</span>
-                    </div>
-                    <div class="order-details">${orderDetails}</div>
-                    <div class="total">Total: ${parseFloat(order.total_amount).toFixed(2)} EGP</div>
-                    ${actionButton}
+        <div class="order-header">
+            <div>
+                <span class="order-number">Order #${order.order_number}</span>
+                <div class="customer-name">
+                    Table #${order.table_number} - ${order.customer_name} placed this order
                 </div>
+            </div>
+            <span class="order-status ${statusClass}">${order.status}</span>
+        </div>
+        <div class="order-details">${orderDetails}</div>
+        <div class="total">Total: ${parseFloat(order.total_amount).toFixed(2)} EGP</div>
+        ${actionButton}
+    </div>
             `;
         });
     })
