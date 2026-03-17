@@ -2,12 +2,10 @@
 // ===== نبدأ الجلسة =====
 session_start();
 if(isset($_GET['table_id'])){
-    $_SESSION['table_id'] = $_GET['table_id'];
+    $_SESSION['table_id'] = intval($_GET['table_id']);
 }
 // ===== علشان نوصل لقاعدة البيانات  =====
 include 'db.php';
-include 'auth_check.php';
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +43,7 @@ include 'auth_check.php';
                 <form id="loginForm">
                     <h3>Sign In</h3>
                     <!-- الإميل -->
-                    <input type="text" placeholder="Email" name="email" required>
+                    <input type="email" placeholder="Email" name="email" required>
                     <!-- الباس-->
                     <input type="password" placeholder="Password" name="password" required>
                     <!-- زرار تسجل الدخول -->
@@ -62,11 +60,25 @@ include 'auth_check.php';
                     <!-- اليوزر -->
                     <input type="text" name="username" placeholder="Username" required>
                     <!-- الإيميل -->
-                    <input type="text" name="email" placeholder="Email" required>
+                    <input type="email" name="email" placeholder="Email" required>
                     <!--  الباس -->
                     <input type="password" name="password" placeholder="Password" required>
                     <!-- تأكيد  الباس -->
                     <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                    <select name="gender" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                    <input type="number" name="age" placeholder="Age" required>
+                    <select name="institute" id="institute" required>
+                        <option value="commerce">Commerce</option>
+                        <option value="engineering">Engineering</option>
+                    </select>
+                    <select name="department" id="department">
+                        <option value="electronics">Electronics</option>
+                        <option value="architecture">Architecture</option>
+                        <option value="civil">Civil</option>
+                    </select>
                     <!-- زرار التسجيل -->
                     <input type="submit" value="Sign Up">
                 </form>

@@ -12,40 +12,38 @@ function loadMyOrders() {
         }
 
         data.forEach(order => {
-            const statusClass = "status-" + order.status.toLowerCase();
-            let orderDetails = "";
-            if(order.items && order.items.length > 0){
-                orderDetails = "<ul>";
-                order.items.forEach(item => {
-                    const subtotal = parseFloat(item.subtotal || (item.price * item.quantity));
-                    let noteHTML = "";
-                    if(item.note && item.note.trim() !== ""){
-                        noteHTML = `<span class="item-note">${item.note}</span>`;
-                    }
-                    orderDetails += `<li>${item.product_name} x ${item.quantity} - ${subtotal.toFixed(2)} EGP ${noteHTML}</li>`;
-                });
-                orderDetails += "</ul>";
-            } else {
-                orderDetails = "<p>No product details</p>";
+    const statusClass = "status-" + order.status.toLowerCase();
+    let orderDetails = "";
+    if(order.items && order.items.length > 0){
+        orderDetails = "<ul>";
+        order.items.forEach(item => {
+            const subtotal = parseFloat(item.subtotal || (item.price * item.quantity));
+            let noteHTML = "";
+            if(item.note && item.note.trim() !== ""){
+                noteHTML = `<span class="item-note">${item.note}</span>`;
             }
+            orderDetails += `<li>${item.product_name} x ${item.quantity} - ${subtotal.toFixed(2)} EGP ${noteHTML}</li>`;
+        });
+        orderDetails += "</ul>";
+    } else {
+        orderDetails = "<p>No product details</p>";
+    }
 
-           container.innerHTML += `
-    <div class="order-card">
+    container.innerHTML += `
+         <div class="order-card">
         <div class="order-header">
             <span class="order-number">Order #${order.order_number}</span>
+            <span class="order-table">${order.display_table}</span>
             <span class="order-status ${statusClass}">${order.status}</span>
         </div>
-
         <div class="order-details">${orderDetails}</div>
-
         <div class="total">Total: ${parseFloat(order.total_amount).toFixed(2)} EGP</div>
-
         <button class="action-btn" onclick="reorder(${order.order_id})">
             Order Again
         </button>
     </div>
-`;
-        });
+    `;
+});
     })
     .catch(err => console.error("Error loading orders:", err));
 }

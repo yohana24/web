@@ -6,15 +6,19 @@ include 'db.php';
 // ============================
 // بنجيب البيانات من الفورم
 // ============================
-$name     = $_POST['username'] ?? '';
-$email    = $_POST['email'] ?? '';
+$name  = trim($_POST['username'] ?? '');
+$email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 $confirm  = $_POST['confirm_password'] ?? '';
+$gender     = $_POST['gender'] ?? '';
+$age        = $_POST['age'] ?? '';
+$institute  = $_POST['institute'] ?? '';
+$department = $_POST['department'] ?? '';
 
 // ============================
 // التأكد إن الخانات مش فاضية 
 // ============================
-if (!$name || !$email || !$password || !$confirm) {
+if (!$name || !$email || !$password || !$confirm || !$gender || !$age || !$institute) {
     echo json_encode(['success'=>false, 'message'=>"Please fill all fields"]);
     exit();
 }
@@ -51,9 +55,21 @@ if ($stmt->num_rows > 0) {
 
 // role افتراضي customer
 $role = 'customer';
-
-$stmt2 = $conn->prepare("INSERT INTO users (name,email,password,role) VALUES (?,?,?,?)"); //بنجهز أمر SQL عشان ندخل بيانات مستخدم جديد في جدول users
-$stmt2->bind_param("ssss", $name, $email, $hashed_password, $role);          //هنا بنربط الـ placeholders اللي في الاستعلام بالمتغيرات الحقيقية.
+if($institute !== "engineering"){
+    $department = NULL;
+}
+$stmt2 = $conn->prepare("INSERT INTO users (name,email,password,gender,age,institute,department,role)
+VALUES (?,?,?,?,?,?,?,?)"); //بنجهز أمر SQL عشان ندخل بيانات مستخدم جديد في جدول users
+$stmt2->bind_param("ssssisss",
+$name,
+$email,
+$hashed_password,
+$gender,
+$age,
+$institute,
+$department,
+$role
+);          //هنا بنربط الـ placeholders اللي في الاستعلام بالمتغيرات الحقيقية.
 
 if ($stmt2->execute()) {
     // بنخزن بيانات المستخدم فى الجلسة

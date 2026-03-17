@@ -65,3 +65,26 @@ loginForm.onsubmit = function(e){
     })
     .catch(err => console.error(err));                     
 }
+let institute = document.getElementById("institute");
+let dept = document.getElementById("department");
+
+// عند تغيير المعهد
+institute.addEventListener("change", function(){
+
+    if(this.value === "engineering"){
+        dept.style.display = "block";
+    }else{
+        dept.style.display = "none";
+        dept.value = "";
+    }
+
+});
+
+// عند تحميل الصفحة
+window.onload = function(){
+
+    if(institute.value !== "engineering"){
+        dept.style.display = "none";
+    }
+
+}

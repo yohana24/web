@@ -44,7 +44,7 @@ function loadOrders(){
             <div>
                 <span class="order-number">Order #${order.order_number}</span>
                 <div class="customer-name">
-                    Table #${order.table_number} - ${order.customer_name} placed this order
+                    ${order.table_number ? "Table #" + order.table_number : "Takeaway"} - ${order.customer_name} placed this order
                 </div>
             </div>
             <span class="order-status ${statusClass}">${order.status}</span>

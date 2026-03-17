@@ -59,7 +59,7 @@ body{
     position: absolute;
     left: 50px;
     width: 350px;
-    height: 480px;
+    height: 580px;
     background: #fff;
     z-index: 1000;
     box-shadow: 0 5px 25px rgba(0,0,0,0.15);
@@ -148,4 +148,26 @@ body{
     color: #333;
     letter-spacing: 0.05em;
     font-size: 0.8em;
+}
+/* نفس شكل الـ input */
+form select {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 10px;
+    outline: none;
+    font-size: 0.8em;
+    border: 1px solid #333;
+    letter-spacing: 0.1em;
+    background: #fff;
+    color: #333;
+    -webkit-appearance: none; /* لإزالة شكل الـ select الافتراضي في WebKit */
+    -moz-appearance: none;    /* لإزالة شكل الـ select الافتراضي في Firefox */
+    appearance: none;
+}
+form select {
+    position: relative;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 15px;
 }

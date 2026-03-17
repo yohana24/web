@@ -330,9 +330,13 @@ include 'auth_check.php';
 		<button class="clear-btn" onclick="clearCart()">
 			Clear All
 		</button>
-		<button class="confirm-btn" onclick="confirmOrder()">
-			Confirm Order
-		</button>
+		<button class="confirm-btn" onclick="confirmOrder(false)">
+    Confirm Order (QR Table)
+</button>
+
+<button class="confirm-btn takeaway-btn" onclick="confirmOrder(true)">
+    Takeaway
+</button>
 	</div>
 
 	<script defer src="products.js"></script>

@@ -148,28 +148,31 @@ function closeCart() {
 }
 
 // إرسال الطلب للسيرفر
-function confirmOrder() {
-                                //  لو السلة فاضية، نعرض رسالة ونوقف تنفيذ الدالة
-    if(cart.length === 0) { alert("Your cart is empty!"); return; }
-                                 //  إرسال البيانات للسيرفر عبر Fetch API
-    fetch("save_order.php", {   // ملف PHP اللي هيحفظ الطلب
-        method: "POST",         // نوع الطلب: POST
-        headers: { "Content-Type": "application/json" },// نوع البيانات اللي هنرسلها: JSON
-        body: JSON.stringify({ cart: cart }) // تحويل السلة (array) إلى JSON
+function confirmOrder(takeaway = false) {
+    if(cart.length === 0) { 
+        alert("Your cart is empty!"); 
+        return; 
+    }
+
+    fetch("save_order.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart: cart, takeaway: takeaway }) 
     })
-     //  قراءة الرد من السيرفر وتحويله إلى JSON
     .then(res => res.json())
     .then(data => {
-        if(data.success) {//  لو السيرفر رجع نجاح
+        if(data.success){
             alert("Order placed! Order Number: " + data.order_number);
-            clearCart();    // نفّس السلة بعد تأكيد الطلب
-            closeCart();    // نفّس السلة بعد تأكيد الطلب
-        } else {            // لو فيه خطأ من السيرفر
-
+            clearCart();
+            closeCart();
+            // مفيش تحويل، المستخدم يفضل في نفس الصفحة
+        } else {
             alert("Error placing order: " + (data.message || "Unknown"));
         }
-    })  // 6️⃣ لو فيه خطأ في الاتصال بالسيرفر
-    .catch(() => { alert("Server Error!"); });
+    })
+    .catch(() => { 
+        alert("Server Error!"); 
+    });
 }
 
 // التعامل مع زر الإضافة للسلة واختيار النكهات
