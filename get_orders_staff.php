@@ -21,7 +21,7 @@ $stmt = $conn->prepare("
         users.name AS customer_name,
         tables.table_number
     FROM orders
-    JOIN users ON orders.user_id = users.user_id
+    LEFT JOIN users ON orders.user_id = users.user_id
     LEFT JOIN tables ON orders.table_id = tables.table_id
     WHERE orders.user_id=?
     ORDER BY orders.created_at DESC
