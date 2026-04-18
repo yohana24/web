@@ -1,5 +1,10 @@
 <?php
 session_start();
+if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'staff'){
+    header("Location: index.php");
+    exit;
+}
+
 include 'db.php';
 include 'auth_check.php';
 

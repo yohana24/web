@@ -1,18 +1,30 @@
+// ===== أول ما الصفحة تفتح =====
+// بنشغل تحميل الأوردرات مباشرة
 document.addEventListener('DOMContentLoaded', () => {
     loadOrders(); // التحميل الأولي للطلبات
 });
 
-// ===== Tab Switching =====
+
+// ===== نظام التابات (Sidebar Navigation) =====
+// الهدف: تغيير المحتوى حسب التاب اللي المستخدم يضغط عليه
 document.querySelectorAll('.sidebar a').forEach(link => {
     link.addEventListener('click', function(e){
-        e.preventDefault();
+        e.preventDefault(); // منع إعادة تحميل الصفحة
+
+        // نشيل active من كل التابات
         document.querySelectorAll('.sidebar a').forEach(l => l.classList.remove('active'));
+
+        // نحط active على التاب الحالي
         this.classList.add('active');
 
+        // نجيب اسم التاب اللي اتضغط عليه
         let tab = this.getAttribute('data-tab');
+
+        // نخفي كل المحتوى ونظهر المحتوى المطلوب
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.getElementById(tab).classList.add('active');
 
+        // نحدد أي دالة تتنفذ حسب التاب
         if(tab==='orders') loadOrders();
         else if(tab==='tables') loadTables();
         else if(tab==='products') loadProducts();
@@ -21,15 +33,22 @@ document.querySelectorAll('.sidebar a').forEach(link => {
     });
 });
 
-// ===== Load Orders =====
+
+// =========================
+//  تحميل الطلبات من السيرفر
+// =========================
 function loadOrders(){
-    fetch('orders/orders.php')
+    fetch('orders/orders.php') // API جلب الأوردرات
     .then(res => res.json())
     .then(data => {
+
+        // مكان عرض البيانات
         if(data.length === 0){
             document.getElementById('orders').innerHTML = "<p>No orders yet...</p>";
             return;
         }
+
+        // بناء جدول HTML للأوردرات
         let html = `
         <table>
         <tr>
@@ -43,6 +62,8 @@ function loadOrders(){
             <th>Items</th>
         </tr>
         `;
+
+        // المرور على كل أوردر
         data.forEach(o => {
             html += `
             <tr>
@@ -53,74 +74,111 @@ function loadOrders(){
                 <td>${o.total_amount}</td>
                 <td>${o.status}</td>
                 <td>${o.created_at}</td>
-                <td class="items">${o.items.map(i => `${i.product_name} (${i.quantity})`).join(", ")}</td>
+
+                <!-- عرض المنتجات داخل الأوردر -->
+                <td class="items">
+                    ${o.items.map(i => `${i.product_name} (${i.quantity})`).join(", ")}
+                </td>
             </tr>
             `;
         });
+
         html += "</table>";
+
+        // عرض الجدول في الصفحة
         document.getElementById('orders').innerHTML = html;
     });
 }
 
-// ===== Load Users =====
+
+// =========================
+//  تحميل المستخدمين
+// =========================
 function loadUsers(){
     fetch('users/users.php')
     .then(res => res.json())
     .then(data => {
-        let html = `<button class="btn btn-primary" onclick="openUserModal()">Add User</button>
+
+        let html = `
+        <button class="btn btn-primary" onclick="openUserModal()">Add User</button>
         <table>
             <tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr>`;
+
         data.forEach(u => {
             html += `<tr>
                 <td>${u.id}</td>
                 <td>${u.name}</td>
                 <td>${u.email}</td>
                 <td>${u.role}</td>
+
+                <!-- أزرار تعديل / حذف -->
                 <td>
-                    <button class="btn btn-primary" onclick="openUserModal(${u.id}, '${encodeURIComponent(u.name)}', '${encodeURIComponent(u.email)}', '${u.role}', '********')">Edit</button>
+                    <button class="btn btn-primary"
+                        onclick="openUserModal(${u.id}, '${encodeURIComponent(u.name)}', '${encodeURIComponent(u.email)}', '${u.role}', '********')">
+                        Edit
+                    </button>
                     <button class="btn btn-danger" onclick="deleteUser(${u.id})">Delete</button>
                 </td>
             </tr>`;
         });
+
         html += '</table>';
+
         document.getElementById('users').innerHTML = html;
     });
 }
 
-// ===== Users Modal =====
+
+// =========================
+//  User Modal (فتح / إغلاق)
+// =========================
 function openUserModal(id='', name='', email='', role='customer', password=''){
     document.getElementById('user_id').value = id;
     document.getElementById('user_name').value = decodeURIComponent(name);
     document.getElementById('user_email').value = decodeURIComponent(email);
     document.getElementById('user_password').value = password;
     document.getElementById('user_role').value = role;
+
+    // تغيير العنوان حسب Add / Edit
     document.getElementById('userModalTitle').innerText = id ? 'Edit User' : 'Add User';
-    openModal('userModal');   // <--- استخدم هنا openModal
-}
-function closeUserModal(){ 
-    closeModal('userModal');  // <--- استخدم هنا closeModal
+
+    openModal('userModal');
 }
 
-// ===== Users Form =====
+function closeUserModal(){ 
+    closeModal('userModal');
+}
+
+
+// =========================
+//  حفظ المستخدم
+// =========================
 document.getElementById('userForm').onsubmit = function(e){
     e.preventDefault();
+
     let formData = new FormData(this);
+
     fetch('users/save_user.php', {method:'POST', body:formData})
     .then(res => res.json())
     .then(data => {
         if(data.success){
             alert(data.message);
             closeUserModal();
-            loadUsers();
+            loadUsers(); // إعادة تحميل البيانات بعد الحفظ
         } else alert(data.message);
     });
 }
 
-// ===== Delete User =====
+
+// =========================
+//  حذف مستخدم
+// =========================
 function deleteUser(id){
     if(confirm('Are you sure to delete this user?')){
+
         let formData = new FormData();
         formData.append('user_id', id);
+
         fetch('users/delete_user.php', {method:'POST', body:formData})
         .then(res => res.json())
         .then(data => {
@@ -130,46 +188,68 @@ function deleteUser(id){
     }
 }
 
-// ===== Load Tables =====
+
+// =========================
+//  تحميل الطاولات
+// =========================
 function loadTables(){
     fetch('tables/tables.php')
     .then(res => res.json())
     .then(data => {
-        let html = `<button class="btn btn-primary" onclick="openTableModal()">Add Table</button>
+
+        let html = `
+        <button class="btn btn-primary" onclick="openTableModal()">Add Table</button>
         <table>
             <tr><th>#</th><th>Number</th><th>Status</th><th>Action</th></tr>`;
+
         data.forEach(t => {
             html += `<tr>
                 <td>${t.id}</td>
                 <td>${t.table_number}</td>
                 <td>${t.status}</td>
+
                 <td>
-                    <button class="btn btn-primary" onclick="openTableModal(${t.id},${t.table_number},'${t.status}')">Edit</button>
+                    <button class="btn btn-primary"
+                        onclick="openTableModal(${t.id},${t.table_number},'${t.status}')">
+                        Edit
+                    </button>
                     <button class="btn btn-danger" onclick="deleteTable(${t.id})">Delete</button>
                 </td>
             </tr>`;
         });
+
         html += '</table>';
         document.getElementById('tables').innerHTML = html;
     });
 }
 
-// ===== Tables Modal =====
+
+// =========================
+//  Table Modal
+// =========================
 function openTableModal(id='', number='', status='available'){
     document.getElementById('table_id').value = id;
     document.getElementById('table_number').value = number;
     document.getElementById('table_status').value = status;
+
     document.getElementById('tableModalTitle').innerText = id ? 'Edit Table' : 'Add Table';
+
     openModal('tableModal');
 }
+
 function closeTableModal(){ 
     closeModal('tableModal');
 }
 
-// ===== Tables Form =====
+
+// =========================
+//  حفظ الطاولة
+// =========================
 document.getElementById('tableForm').onsubmit = function(e){
     e.preventDefault();
+
     let formData = new FormData(this);
+
     fetch('tables/save_table.php',{method:'POST', body:formData})
     .then(res => res.json())
     .then(data => {
@@ -181,11 +261,15 @@ document.getElementById('tableForm').onsubmit = function(e){
     });
 }
 
-// ===== Delete Table =====
+
+// =========================
+//  حذف طاولة
+// =========================
 function deleteTable(id){
     if(confirm('Are you sure to delete this table?')){
         let formData = new FormData();
         formData.append('table_id', id);
+
         fetch('tables/delete_table.php',{method:'POST', body:formData})
         .then(res => res.json())
         .then(data => {
@@ -195,33 +279,49 @@ function deleteTable(id){
     }
 }
 
-// ===== Load Products =====
+
+// =========================
+//  تحميل المنتجات
+// =========================
 function loadProducts(){
     fetch('products/products.php')
     .then(res => res.json())
     .then(data => {
-        let html = `<button class="btn btn-primary" onclick="openProductModal()">Add Product</button>
+
+        let html = `
+        <button class="btn btn-primary" onclick="openProductModal()">Add Product</button>
         <table>
             <tr><th>#</th><th>Name</th><th>Price</th><th>Description</th><th>Action</th></tr>`;
+
         data.forEach(p => {
             html += `<tr>
                 <td>${p.id}</td>
                 <td>${p.name}</td>
                 <td>${p.price}</td>
                 <td>${p.description}</td>
+
                 <td>
-                    <button class="btn btn-primary" onclick="openProductModal(${p.id},'${p.name}',${p.price},'${p.description}',${p.stock_quantity},${p.category_id})">Edit</button>
+                    <button class="btn btn-primary"
+                        onclick="openProductModal(${p.id},'${p.name}',${p.price},'${p.description}',${p.stock_quantity},${p.category_id})">
+                        Edit
+                    </button>
+
                     <button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+
                     <button class="btn btn-primary" onclick="openFlavors(${p.id})">Flavors</button>
                 </td>
             </tr>`;
         });
+
         html += '</table>';
         document.getElementById('products').innerHTML = html;
     });
 }
 
-// ===== Products Modal =====
+
+// =========================
+//  Product Modal
+// =========================
 function openProductModal(id='', name='', price='', description='', stock='', category=''){
     document.getElementById('product_id').value = id;
     document.getElementById('product_name').value = name || '';
@@ -229,17 +329,25 @@ function openProductModal(id='', name='', price='', description='', stock='', ca
     document.getElementById('product_description').value = description || '';
     document.getElementById('product_stock').value = stock || 0;
     document.getElementById('product_category').value = category || '';
+
     document.getElementById('productModalTitle').innerText = id ? 'Edit Product' : 'Add Product';
+
     openModal('productModal');
 }
+
 function closeProductModal(){ 
     closeModal('productModal');
 }
 
-// ===== Products Form =====
+
+// =========================
+//  حفظ المنتج
+// =========================
 document.getElementById('productForm').onsubmit = function(e){
     e.preventDefault();
+
     let formData = new FormData(this);
+
     fetch('products/save_product.php',{method:'POST', body:formData})
     .then(res => res.json())
     .then(data => {
@@ -253,11 +361,16 @@ document.getElementById('productForm').onsubmit = function(e){
     });
 }
 
-// ===== Delete Product =====
+
+// =========================
+//  حذف منتج
+// =========================
 function deleteProduct(id){
     if(confirm('Are you sure to delete this product?')){
+
         let formData = new FormData();
         formData.append('product_id',id);
+
         fetch('products/delete_product.php',{method:'POST', body:formData})
         .then(res => res.json())
         .then(data => {
@@ -267,17 +380,23 @@ function deleteProduct(id){
     }
 }
 
-// ===== Reports =====
+
+// =========================
+//  التقارير
+// =========================
 function loadReports(){
     fetch('reports/get_reports.php')
     .then(res => res.json())
     .then(data => {
+
         if(data.length === 0){
             document.getElementById('reports').innerHTML = '<p>No messages yet...</p>';
             return;
         }
+
         let html = `<table>
 <tr><th>#</th><th>Name</th><th>Email</th><th>Message</th><th>Date</th></tr>`;
+
         data.forEach(r => {
             html += `<tr>
 <td>${r.id}</td>
@@ -287,21 +406,31 @@ function loadReports(){
 <td>${r.created_at}</td>
 </tr>`;
         });
+
         html += '</table>';
         document.getElementById('reports').innerHTML = html;
     });
 }
 
-// ===== Auto Refresh =====
+
+// =========================
+//  تحديث تلقائي للبيانات
+// =========================
 setInterval(() => {
+
     let activeTab = document.querySelector('.sidebar a.active').getAttribute('data-tab');
+
     if(activeTab === 'users') loadUsers();
     else if(activeTab === 'products') loadProducts();
     else if(activeTab === 'tables') loadTables();
     else if(activeTab === 'orders') loadOrders();
+
 }, 7000);
 
-// ===== Flavors =====
+
+// =========================
+//  Flavors System
+// =========================
 function openFlavors(product_id){
     document.getElementById("flavor_product_id").value = product_id;
     document.getElementById("flavorModal").style.display = "grid";
@@ -309,13 +438,16 @@ function openFlavors(product_id){
 }
 
 function loadFlavors(product_id){
+
     if(document.getElementById("flavorModal").style.display === "none") return;
 
     fetch("flavors/flavors.php?product_id="+product_id)
     .then(res => res.json())
     .then(data => {
+
         let html = `<table>
 <tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Action</th></tr>`;
+
         data.forEach(f=>{
             html += `<tr>
 <td>${f.flavor_id}</td>
@@ -328,21 +460,32 @@ function loadFlavors(product_id){
 </td>
 </tr>`;
         });
+
         html += "</table>";
+
         document.getElementById("flavorsList").innerHTML = html;
 
         let dropdown = `<select id="flavor_select_${product_id}">`;
+
         data.forEach(f=>{
             dropdown += `<option value="${f.flavor_id}">${f.flavor_name} - $${f.price}</option>`;
         });
+
         dropdown += `</select>`;
+
         document.getElementById("flavorDropdownContainer").innerHTML = dropdown;
     });
 }
 
+
+// =========================
+//  حفظ الفلايفر
+// =========================
 document.getElementById("flavorForm").onsubmit = function(e){
     e.preventDefault();
+
     let formData = new FormData(this);
+
     fetch("flavors/save_flavor.php", {
         method:"POST",
         body:formData
@@ -360,10 +503,17 @@ document.getElementById("flavorForm").onsubmit = function(e){
     });
 }
 
+
+// =========================
+//  حذف flavor
+// =========================
 function deleteFlavor(id){
+
     if(confirm("Delete this flavor?")){
+
         let formData = new FormData();
         formData.append("flavor_id",id);
+
         fetch("flavors/delete_flavor.php", {
             method:"POST",
             body:formData
@@ -378,28 +528,51 @@ function deleteFlavor(id){
     }
 }
 
+
+// =========================
+// فتح / تعديل flavor
+// =========================
 function openFlavorModal(id='', name='', price='', stock='', image=''){
     document.getElementById('flavor_id').value = id;
     document.getElementById('flavor_name').value = name || '';
     document.getElementById('flavor_price').value = price || 0;
     document.getElementById('flavor_stock_quantity').value = stock || 0;
+
     document.getElementById('flavorModalTitle').innerText = id ? 'Edit Flavor' : 'Add Flavor';
+
     openModal('flavorModal');
 }
+
+
+// =========================
+//  إغلاق flavor modal
+// =========================
 function closeFlavorModal(){ 
     closeModal('flavorModal');
+
     document.getElementById("flavorsList").innerHTML = '';
     document.getElementById("flavorDropdownContainer").innerHTML = '';
 }
-// ===== Generic Open/Close Modal =====
+
+
+// =========================
+//  فتح modal عام
+// =========================
 function openModal(modalId){
     let modal = document.getElementById(modalId);
     modal.classList.add('show');
     modal.style.display = 'flex';
 }
 
+
+// =========================
+//  قفل modal عام
+// =========================
 function closeModal(modalId){
     let modal = document.getElementById(modalId);
     modal.classList.remove('show');
-    setTimeout(() => { modal.style.display = 'none'; }, 300);
+
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
 }

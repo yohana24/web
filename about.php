@@ -72,27 +72,49 @@ session_start();
 </div>
 
 <script>
-    let calcScrollValue = () => {
-        let scrollProgress = document.getElementById("progress");
-        let progressValue = document.getElementById("progress-value");
-        let pos = document.documentElement.scrollTop;
-        let calcHeight =
-            document.documentElement.scrollHeight -
-            document.documentElement.clientHeight;
-        let scrollValue = Math.round((pos * 100) / calcHeight);
-        if (pos > 100) {
-            scrollProgress.style.display = "grid";
-        } else {
-            scrollProgress.style.display = "none";
-        }
-        scrollProgress.addEventListener("click", () => {
-            document.documentElement.scrollTop = 0;
-        });
-        scrollProgress.style.background = `conic-gradient(#333 ${scrollValue}%, #d7d7d7 ${scrollValue}%)`;
+// ===== دالة حساب نسبة السكرول في الصفحة =====
+let calcScrollValue = () => {
+
+    // عنصر الدائرة اللي بتعرض نسبة السكرول
+    let scrollProgress = document.getElementById("progress");
+
+    // العنصر اللي جوا الدائرة (لو فيه رقم أو أيقونة)
+    let progressValue = document.getElementById("progress-value");
+
+    // مكان السكرول الحالي في الصفحة
+    let pos = document.documentElement.scrollTop;
+
+    // طول الصفحة الكلي - طول الشاشة الظاهر
+    let calcHeight =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+
+    // حساب نسبة السكرول من 100%
+    let scrollValue = Math.round((pos * 100) / calcHeight);
+
+    // ===== إظهار أو إخفاء زر الرجوع للأعلى =====
+    if (pos > 100) {
+        scrollProgress.style.display = "grid";
+    } else {
+        scrollProgress.style.display = "none";
+    }
+
+    // ===== عند الضغط يرجع لأول الصفحة =====
+    scrollProgress.addEventListener("click", () => {
+        document.documentElement.scrollTop = 0;
+    });
+
+    // ===== رسم شكل الدائرة حسب نسبة السكرول =====
+    scrollProgress.style.background =
+        `conic-gradient(#333 ${scrollValue}%, #d7d7d7 ${scrollValue}%)`;
 };
 
+// تشغيل الدالة أثناء السكرول
 window.onscroll = calcScrollValue;
+
+// تشغيلها أول ما الصفحة تحمل
 window.onload = calcScrollValue;
+</script>
 </script>
 </body>
 </html>

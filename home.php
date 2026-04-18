@@ -1,7 +1,7 @@
 <?php
 session_start();
-if(!isset($_SESSION['user_id'])){
-header("Location: index.php");
+if(!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'user'){
+    header("Location: index.php");
 exit();
 }
 include 'auth_check.php';

@@ -1,9 +1,15 @@
 let isLoadingOrders = false;
 let isLoadingNotifications = false;
 
-// ===== Load Orders =====
+// لتجنب إعادة رسم نفس الطلبات لو مفيش تغيير
+let lastOrdersHTML = "";
+
+// =========================
+// 📦 LOAD USER ORDERS
+// =========================
 function loadMyOrders() {
 
+    // منع تكرار الفetch لو لسه في طلب شغال
     if (isLoadingOrders) return;
     isLoadingOrders = true;
 
@@ -12,77 +18,100 @@ function loadMyOrders() {
         .then(data => {
 
             const container = document.getElementById("ordersContainer");
-            container.innerHTML = "";
+            if (!container) return;
 
+            // لو مفيش أوردرات
             if (!data || data.length === 0) {
                 container.innerHTML = "<p class='text-center text-muted'>You have no orders yet.</p>";
+                lastOrdersHTML = "";
                 return;
             }
 
+            let html = "";
+
+            // بناء شكل كل order
             data.forEach(order => {
 
                 const statusClass = "status-" + (order.status || "").toLowerCase();
 
-                let orderDetails = "";
+                let orderDetails = "<p>No product details</p>";
 
+                // عرض المنتجات داخل الطلب
                 if (order.items && order.items.length > 0) {
+
                     orderDetails = "<ul>";
 
                     order.items.forEach(item => {
 
-                        const subtotal = parseFloat(item.subtotal || (item.price * item.quantity));
+                        const subtotal = Number(item.subtotal || (item.price * item.quantity));
 
-                        let noteHTML = "";
-                        if (item.note && item.note.trim() !== "") {
-                            noteHTML = `<span class="item-note">${item.note}</span>`;
-                        }
+                        const note = item.note && item.note.trim()
+                            ? `<span class="item-note">${item.note}</span>`
+                            : "";
 
                         orderDetails += `
                             <li>
                                 ${item.product_name} x ${item.quantity}
                                 - ${subtotal.toFixed(2)} EGP
-                                ${noteHTML}
+                                ${note}
                             </li>
                         `;
                     });
 
                     orderDetails += "</ul>";
-                } else {
-                    orderDetails = "<p>No product details</p>";
                 }
 
-                container.innerHTML += `
+                // كارت العرض النهائي للطلب
+                html += `
                     <div class="order-card">
+
                         <div class="order-header">
+
                             <span class="order-number">Order #${order.order_number}</span>
-                            <span class="order-table">${order.display_table || ""}</span>
-                            <span class="order-status ${statusClass}">${order.status}</span>
+
+                            <span class="order-table">
+                                ${order.display_table || ""}
+                            </span>
+
+                            <span class="order-status ${statusClass}">
+                                ${order.status}
+                            </span>
+
                         </div>
 
-                        <div class="order-details">${orderDetails}</div>
+                        <div class="order-details">
+                            ${orderDetails}
+                        </div>
 
                         <div class="total">
-                            Total: ${parseFloat(order.total_amount || 0).toFixed(2)} EGP
+                            Total: ${Number(order.total_amount || 0).toFixed(2)} EGP
                         </div>
 
                         <button class="action-btn" onclick="reorder(${order.order_id})">
                             Order Again
                         </button>
+
                     </div>
                 `;
             });
 
+            // تحديث الصفحة فقط لو فيه تغيير
+            if (html !== lastOrdersHTML) {
+                container.innerHTML = html;
+                lastOrdersHTML = html;
+            }
+
         })
-        .catch(err => {
-            console.error("Error loading orders:", err);
-        })
+        .catch(err => console.error("Orders Error:", err))
         .finally(() => {
             isLoadingOrders = false;
         });
 }
 
 
-// ===== Notifications =====
+// =========================
+// 🔔 NOTIFICATIONS SYSTEM
+// =========================
 function checkNotifications() {
 
     if (isLoadingNotifications) return;
@@ -92,47 +121,52 @@ function checkNotifications() {
         .then(res => res.json())
         .then(data => {
 
+            const popup = document.getElementById("order-popup");
+            if (!popup) return;
+
+            // لو مفيش إشعارات
             if (!data || data.length === 0) return;
 
-            const popup = document.getElementById("order-popup");
+            const latest = data[0];
 
-            data.forEach(notification => {
+            // عرض أحدث notification فقط
+            if (latest && latest.message) {
 
-                popup.innerHTML = notification.message;
+                popup.innerHTML = latest.message;
                 popup.style.display = "block";
 
+                // إخفاء بعد 3 ثواني
                 setTimeout(() => {
                     popup.style.display = "none";
-                }, 4000);
+                }, 3000);
 
+                // تعليم الإشعار إنه اتقري
                 fetch('mark_notification_read.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: notification.notification_id })
+                    body: JSON.stringify({ id: latest.notification_id })
                 });
-            });
+            }
 
         })
-        .catch(err => console.error(err))
+        .catch(err => console.error("Notifications Error:", err))
         .finally(() => {
             isLoadingNotifications = false;
         });
 }
 
 
-// ===== Reorder =====
+// =========================
+// 🔁 REORDER FUNCTION
+// =========================
 function reorder(orderId) {
 
     if (!confirm("Do you want to order the same items again?")) return;
 
     fetch("reorder.php", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            order_id: orderId
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order_id: orderId })
     })
         .then(res => res.json())
         .then(data => {
@@ -145,45 +179,68 @@ function reorder(orderId) {
             }
 
         })
-        .catch(err => console.error(err));
+        .catch(err => console.error("Reorder Error:", err));
 }
 
 
-// ===== Initial Load =====
+// =========================
+// 🚀 SAFE POLLING SYSTEM
+// =========================
+
+// أول تحميل مباشر
 loadMyOrders();
 checkNotifications();
 
-setInterval(loadMyOrders, 3000);
-setInterval(checkNotifications, 3000);
+// polling بدون تداخل requests
+function startPolling() {
+
+    setTimeout(function ordersLoop() {
+        loadMyOrders();
+        setTimeout(ordersLoop, 8000);
+    }, 8000);
+
+    setTimeout(function notifLoop() {
+        checkNotifications();
+        setTimeout(notifLoop, 3000);
+    }, 3000);
+}
+
+startPolling();
 
 
-// ===== Scroll Progress Circle =====
-let calcScrollValue = () => {
+// =========================
+// 📊 SCROLL PROGRESS BUTTON
+// =========================
+let scrollProgress = document.getElementById("progress");
 
-    let scrollProgress = document.getElementById("progress");
+function calcScrollValue() {
 
-    let pos = document.documentElement.scrollTop;
+    if (!scrollProgress) return;
 
-    let calcHeight =
+    let pos = document.documentElement.scrollTop || document.body.scrollTop;
+
+    let height =
         document.documentElement.scrollHeight -
         document.documentElement.clientHeight;
 
-    let scrollValue = Math.round((pos * 100) / calcHeight);
+    let scrollValue = height ? Math.round((pos * 100) / height) : 0;
 
+    // إظهار الزر بعد scroll معين
     if (pos > 100) {
         scrollProgress.style.display = "grid";
     } else {
         scrollProgress.style.display = "none";
     }
 
+    // الرجوع للأعلى بسلاسة
     scrollProgress.onclick = () => {
-        document.documentElement.scrollTop = 0;
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    // شكل الـ progress الدائري
     scrollProgress.style.background =
         `conic-gradient(#333 ${scrollValue}%, #d7d7d7 ${scrollValue}%)`;
-};
+}
 
-
-window.onscroll = calcScrollValue;
-window.onload = calcScrollValue;
+window.addEventListener("scroll", calcScrollValue);
+window.addEventListener("load", calcScrollValue);
