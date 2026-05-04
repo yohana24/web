@@ -57,7 +57,7 @@ loginForm.onsubmit = function(e){
             } else if(data.role === 'staff'){               
                 window.location.href = 'staff_orders.php';   // Staff
             } else {                                       
-                window.location.href = 'home.php';          // Customer
+                window.location.href = 'products.php';          // Customer
             }
         } else {                                           
             alert(data.message);                       

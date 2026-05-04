@@ -1,101 +1,108 @@
 <?php
-// ===== نبدأ الجلسة =====
 session_start();
+include 'lang.php';
+
 if(isset($_GET['table_id'])){
     $_SESSION['table_id'] = intval($_GET['table_id']);
 }
-// ===== علشان نوصل لقاعدة البيانات  =====
+
 include 'db.php';
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $lang; ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل دخول / تسجيل حساب جديد</title>
 
-    <!-- ===== CSS ===== -->
+    <title><?php echo t('login_title'); ?></title>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="stylee.css">
 
-    <!-- ===== Google Fonts ===== -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+Makasar&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <div class="container">
 
-        <!-- ===== الصندوق اللي حواه تسجيل الدخول ===== -->
-        <div class="box signin">
-            <h2>Already Have an Account?</h2>
-            <button class="signinBtn">Sign in</button>
-        </div>
+<div class="container">
 
-        <div class="box signup">
-            <h2>Don't Have an Account?</h2>
-            <button class="signupBtn">Sign up</button>
-        </div>
-
-        <div class="formBx">
-
-            <!-- ===== فورم تسجيل الدخول ===== -->
-            <div class="form signinform">
-                <form id="loginForm">
-                    <h3>Sign In</h3>
-                    <!-- الإميل -->
-                    <input type="email" placeholder="Email" name="email" required>
-                    <!-- الباس-->
-                    <input type="password" placeholder="Password" name="password" required>
-                    <!-- زرار تسجل الدخول -->
-                    <input type="submit" value="Login">
-                </form>
-                <!-- رسالة لو فى غلط ربنا ميجبش غلط :) -->
-                <div id="loginError" class="error"></div>
-            </div>
-
-            <!-- ===== فورم تسجيل حساب جديد ===== -->
-            <div class="form signupform">
-                <form id="signupForm">
-                    <h3>Sign Up</h3>
-                    <!-- اليوزر -->
-                    <input type="text" name="username" placeholder="Username" required>
-                    <!-- الإيميل -->
-                    <input type="email" name="email" placeholder="Email" required>
-                    <!--  الباس -->
-                    <input type="password" name="password" placeholder="Password" required>
-                    <!-- تأكيد  الباس -->
-                    <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-                    <select name="gender" required>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                    </select>
-                    <input type="number" name="age" placeholder="Age" required>
-                    <select name="institute" id="institute" required>
-                        <option value="commerce">Commerce</option>
-                        <option value="engineering">Engineering</option>
-                    </select>
-                    <select name="department" id="department">
-                        <option value="electronics">Electronics</option>
-                        <option value="architecture">Architecture</option>
-                        <option value="civil">Civil</option>
-                    </select>
-                    <!-- زرار التسجيل -->
-                    <input type="submit" value="Sign Up">
-                </form>
-                <!-- رسالة لو فى غلط ربنا ميجبش غلط :) -->
-                <div id="signupError" class="error"></div>
-            </div>
-
-        </div>
+    <!-- ===== box login ===== -->
+    <div class="box signin">
+        <h2><?php echo t('signin_text'); ?></h2>
+        <button class="signinBtn"><?php echo t('signin_btn'); ?></button>
     </div>
 
-    <!-- ===== جافاسكربت ===== -->
-         <script>
+    <!-- ===== box signup ===== -->
+    <div class="box signup">
+        <h2><?php echo t('signup_text'); ?></h2>
+        <button class="signupBtn"><?php echo t('signup_btn'); ?></button>
+    </div>
+
+    <div class="formBx">
+
+        <!-- ===== LOGIN ===== -->
+        <div class="form signinform">
+            <form id="loginForm">
+                <h3><?php echo t('signin_header'); ?></h3>
+
+                <input type="email" placeholder="<?php echo t('email'); ?>" name="email" required>
+                <input type="password" placeholder="<?php echo t('password'); ?>" name="password" required>
+
+                <input type="submit" value="<?php echo t('login_btn'); ?>">
+            </form>
+
+            <div id="loginError" class="error"></div>
+        </div>
+
+        <!-- ===== SIGNUP ===== -->
+        <div class="form signupform">
+            <form id="signupForm">
+                <h3><?php echo t('signup_header'); ?></h3>
+
+                <input type="text" name="username" placeholder="<?php echo t('username'); ?>" required>
+                <input type="email" name="email" placeholder="<?php echo t('email'); ?>" required>
+                <input type="password" name="password" placeholder="<?php echo t('password'); ?>" required>
+                <input type="password" name="confirm_password" placeholder="<?php echo t('confirm_password'); ?>" required>
+                <input type="text" name="phone" placeholder="<?php echo t('phone'); ?>" required>
+                <select name="gender" required>
+                    <option value="male"><?php echo t('male'); ?></option>
+                    <option value="female"><?php echo t('female'); ?></option>
+                </select>
+
+                <input type="number" name="age" placeholder="<?php echo t('age'); ?>" required>
+
+                <select name="institute" required>
+                    <option value="commerce">Commerce</option>
+                    <option value="engineering">Engineering</option>
+                </select>
+
+                <select name="department">
+                    <option value="electronics">Electronics</option>
+                    <option value="architecture">Architecture</option>
+                    <option value="civil">Civil</option>
+                </select>
+
+                <input type="submit" value="<?php echo t('signup_btn_submit'); ?>">
+            </form>
+
+            <div id="signupError" class="error"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- حفظ table -->
+<script>
 <?php if(isset($_SESSION['table_id'])): ?>
     sessionStorage.setItem('table_id', "<?php echo $_SESSION['table_id']; ?>");
 <?php endif; ?>
 </script>
-    <script src="login.js"></script>
+
+<script src="login.js"></script>
 
 </body>
 </html>

@@ -3,7 +3,7 @@ session_start();
 include 'db.php';
 header('Content-Type: application/json');
 
-// ===== جلب كل الطلبات (Staff يشوف الكل) =====
+// ===== جلب كل الطلبات =====
 $stmt = $conn->prepare("
 SELECT 
     o.order_id,
@@ -13,6 +13,7 @@ SELECT
     o.created_at,
     o.table_id,
     u.name AS customer_name,
+    u.phone AS phone,
     t.table_number
 FROM orders o
 JOIN users u ON o.user_id = u.user_id
@@ -29,7 +30,7 @@ while($row = $result->fetch_assoc()){
 
     $order_id = $row['order_id'];
 
-    // ===== إنشاء order جديد لو مش موجود =====
+    // ===== إنشاء order =====
     if(!isset($orders[$order_id])){
 
         $orders[$order_id] = [
@@ -40,12 +41,13 @@ while($row = $result->fetch_assoc()){
             "created_at" => $row['created_at'],
             "table_id" => $row['table_id'],
             "customer_name" => $row['customer_name'],
+            "phone" => $row['phone'],
             "table_number" => $row['table_number'],
             "items" => []
         ];
     }
 
-    // ===== جلب items لكل order =====
+    // ===== جلب items الصح =====
     $itemsStmt = $conn->prepare("
         SELECT 
             p.name AS product_name,

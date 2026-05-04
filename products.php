@@ -1,7 +1,8 @@
 <?php
 	session_start();
 	include 'db.php';
-include 'auth_check.php';
+	include 'auth_check.php';
+	include 'lang.php';
 
 	// التأكد إن المستخدم عامل تسجيل دخول
 	if (!isset($_SESSION['user_id'])) {
@@ -20,7 +21,7 @@ include 'auth_check.php';
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<title>Products Page</title>
+	<title><?php echo t('products_page'); ?></title>
 
 	<!-- CSS -->
 	<link rel="stylesheet" href="products.css">
@@ -50,18 +51,16 @@ include 'auth_check.php';
 				<nav>
 
 					<div class="logo">
-						Everything Under Control
+						<?php echo t('Everything Under Control'); ?>
 					</div>
 
 					<ul class="nav-links">
-						<li><a href="home.php">Home</a></li>
-						<li><a href="products.php">Menu</a></li>
-						<li><a href="about.php">About</a></li>
-						<li><a href="Contact Us.php">Contact</a></li>
-						<li><a href="my_orders.php">My Orders</a></li>
-						<li class="li"><a href="index.php">LOGOUT</a></li>
-						
-
+						<li><a href="home.php"><?php echo t('home'); ?></a></li>
+						<li><a href="products.php"><?php echo t('menu'); ?></a></li>
+						<li><a href="about.php"><?php echo t('about'); ?></a></li>
+						<li><a href="Contact Us.php"><?php echo t('contact'); ?></a></li>
+						<li><a href="my_orders.php"><?php echo t('my_orders'); ?></a></li>
+						<li><a href="logout.php"><?php echo t('logout'); ?></a></li>
 					</ul>
 
 					<!-- ===== Search ===== -->
@@ -70,7 +69,7 @@ include 'auth_check.php';
 						<input
 							type="text"
 							class="search_input"
-							placeholder="Search"
+							placeholder="<?php echo t('search'); ?>"
 						>
 
 						<div class="search_icon">
@@ -89,7 +88,7 @@ include 'auth_check.php';
 						<i class="ri-shopping-basket-2-line"></i>
 
 					</div>
-
+					
 				</nav>
 
 			</div>
@@ -198,7 +197,7 @@ include 'auth_check.php';
 		<!-- ===== Product Card ===== -->
 		<div class="card-container"
 
-			data-name="<?php echo $row['name']; ?>"
+			data-name="<?php echo ($lang == 'ar') ? $row['name_ar'] : $row['name_en']; ?>"
 			data-price="<?php echo $row['price']; ?>"
 			data-default-image="images/<?php echo $row['image']; ?>"
 			data-default-price="<?php echo $row['price']; ?>">
@@ -222,7 +221,7 @@ include 'auth_check.php';
 				<!-- صورة المنتج -->
 				<img
 					src="images/<?php echo $row['image']; ?>"
-					alt="<?php echo $row['name']; ?>"
+					alt="<?php echo ($lang == 'ar') ? $row['name_ar'] : $row['name_en']; ?>"
 					class="potato"
 					loading="lazy"
 					decoding="async"
@@ -231,30 +230,31 @@ include 'auth_check.php';
 				<div class="go">
 
 					<!-- اسم المنتج  -->
-					<h2 data-original-name="<?php echo htmlspecialchars($row['name']); ?>">
-						<?php echo $row['name']; ?>
+					<h2 data-original-name="<?php echo htmlspecialchars(($lang == 'ar') ? $row['name_ar'] : $row['name_en']); ?>">
+						<?php echo ($lang == 'ar') ? $row['name_ar'] : $row['name_en']; ?>
 					</h2>
 
 					<!-- سعر المنتج -->
 					<h6>
-						Price:
-						<span><?php echo $row['price']; ?></span>
-						EGP
+						السعر:
+						<?php echo t('price'); ?>: <span><?php echo $row['price']; ?></span> EGP
+						
 					</h6>
 
 					<!-- بيشوف لو المنتج متوفر ولا لا  -->
 					<?php if ($row['stock_quantity'] > 0): ?>
-                        <!-- زر اضافة الى السلة  -->
+
+						<!-- زر اضافة الى السلة  -->
 						<button
 							class="add-to-cart"
 							data-id="<?php echo $row['product_id']; ?>"    
-							data-name="<?php echo htmlspecialchars($row['name']); ?>"
+							data-name="<?php echo htmlspecialchars(($lang == 'ar') ? $row['name_ar'] : $row['name_en']); ?>"
 							data-price="<?php echo $row['price']; ?>"
 						>
 
 							<div class="background"></div>
 
-							<span>Add To Cart</span>
+							<span><?php echo t('add_to_cart'); ?></span>
 
 							<div class="cart-icon">
 								<svg viewBox="0 0 24 24">
@@ -271,28 +271,27 @@ include 'auth_check.php';
 							</div>
 
 						</button>
-                    <!-- لو المنتج مش موجود يطبع الجملة ده  -->
+
 					<?php else: ?>
 
 						<button class="add-to-cart disabled-stock" disabled>
 							<div class="background"></div>
-							<span>Out Of Stock</span>
+							<span><?php echo t('out_of_stock'); ?></span>
 						</button>
 
 					<?php endif; ?>
 
 					<?php
-						// ===== جلب النكهات =====
 						$flavors_sql = "SELECT * FROM product_flavors WHERE product_id = $product_id";
 						$flavors_result = $conn->query($flavors_sql);
 
 						if ($flavors_result->num_rows > 0):
 					?>
 						<div class="flavor-container">
-                            <!-- قائمة النكهات ال dropdown  -->
+
 							<select class="flavor-select" data-product-id="<?php echo $product_id; ?>">
-								<option value="">Choose Flavor</option>
-                                <!-- عرض كل ناكهة  -->
+								<option value=""><?php echo t('choose_flavor'); ?></option>
+
 								<?php while ($flavor = $flavors_result->fetch_assoc()): ?>
 									<option
 										value="<?php echo $flavor['flavor_id']; ?>"
@@ -304,40 +303,55 @@ include 'auth_check.php';
 									</option>
 								<?php endwhile; ?>
 							</select>
+
 						</div>
 					<?php endif; ?>
+
 				</div>
 			</div>
 		</div>
-	<?php
-			}//لو مفيش منتجات يطبع الجملة ده
-		} else {
-			echo "<p style='color:white; text-align:center;'>No products available</p>";
-		}
-	?>
+
+	<?php } } ?>
 	</div>
 
 	<!-- ===== CART POPUP ===== -->
 	<div class="cart-popup" id="cartPopup">
-		<h3>Your Cart</h3>
+		<h3><?php echo t('cart'); ?></h3>
 		<ul id="cartItems"></ul>
 		<div class="total">
-			Total: <span id="totalPrice">0</span> EGP
+			<?php echo t('total'); ?>:
+			<span id="totalPrice">0</span> EGP
 		</div>
-		<button class="close-btn" onclick="closeCart()">
-			Close
-		</button>
-		<button class="clear-btn" onclick="clearCart()">
-			Clear All
-		</button>
+		<button class="close-btn" onclick="closeCart()"><?php echo t('close'); ?></button>
+		<button class="clear-btn" onclick="clearCart()"><?php echo t('clear'); ?></button>
 		<button class="confirm-btn" onclick="confirmOrder(false)">
-    Confirm Order (QR Table)
-</button>
+			<?php echo t('confirm_order_table'); ?>
+		</button>
 
-<button class="confirm-btn takeaway-btn" onclick="confirmOrder(true)">
-    Takeaway
-</button>
+		<button class="confirm-btn takeaway-btn" onclick="confirmOrder(true)">
+			<?php echo t('takeaway_order'); ?>
+		</button>
 	</div>
+
+<script>
+document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', function(e){
+        e.preventDefault();
+
+        let url = this.getAttribute('href');
+
+        document.body.classList.add('fade-out');
+
+        setTimeout(() => {
+            window.location.href = url;
+        }, 300);
+    });
+});
+
+window.onload = () => {
+    document.body.classList.add('fade-in');
+};
+</script>
 
 	<script defer src="products.js"></script>
 </body>

@@ -1,8 +1,92 @@
+const trans = {
+    en: {
+        no_orders: "No orders yet...",
+        add_user: "Add User",
+        edit_user: "Edit User",
+        delete: "Delete",
+        edit: "Edit",
+        name: "Name",
+        email: "Email",
+        role: "Role",
+        action: "Action",
+        price: "Price",
+        description: "Description",
+        table_number: "Table Number",
+        status: "Status",
+        id: "ID",
+        order_number: "Order #",
+        user: "User",
+        table: "Table",
+        total: "Total",
+        
+        date: "Date",
+        items: "Items",
+id: "#",
+        name: "Name",
+        email: "Email",
+        message: "Message",
+        date: "Date",
+        confirm_delete_user: "Are you sure to delete this user?",
+        confirm_delete_table: "Are you sure to delete this table?",
+        confirm_delete_product: "Are you sure to delete this product?",
+pending: "Pending",
+        completed: "Completed",
+        cancelled: "Cancelled",
+        add_table: "Add Table",
+        edit_table: "Edit Table",
+
+        add_product: "Add Product",
+        edit_product: "Edit Product",
+
+        no_messages: "No messages yet...",
+        flavor: "Flavors"
+    },
+
+    ar: {
+        no_orders: "لا توجد طلبات حتى الآن...",
+        add_user: "إضافة مستخدم",
+        edit_user: "تعديل مستخدم",
+        delete: "حذف",
+        edit: "تعديل",
+        name: "الاسم",
+        email: "الإيميل",
+        role: "الدور",
+        action: "الإجراء",
+        price: "السعر",
+        description: "الوصف",
+        table_number: "رقم الطاولة",
+        status: "الحالة",
+id: "ID",
+        order_number: "رقم الطلب",
+        user: "المستخدم",
+        table: "الطاولة",
+        total: "الإجمالي",
+        
+        date: "التاريخ",
+        items: "العناصر",
+        confirm_delete_user: "هل أنت متأكد من حذف المستخدم؟",
+        confirm_delete_table: "هل أنت متأكد من حذف الطاولة؟",
+        confirm_delete_product: "هل أنت متأكد من حذف المنتج؟",
+pending: "قيد الانتظار",
+        completed: "مكتمل",
+        cancelled: "ملغي",
+        add_table: "إضافة طاولة",
+        edit_table: "تعديل طاولة",
+
+        add_product: "إضافة منتج",
+        edit_product: "تعديل منتج",
+id: "#",
+        name: "الاسم",
+        email: "الإيميل",
+        message: "الرسالة",
+        date: "التاريخ",
+        no_messages: "لا توجد رسائل حتى الآن...",
+        flavor: "النكهات"
+    }
+};
 // ===== أول ما الصفحة تفتح =====
 // بنشغل تحميل الأوردرات مباشرة
-document.addEventListener('DOMContentLoaded', () => {
-    loadOrders(); // التحميل الأولي للطلبات
-});
+
 
 
 // ===== نظام التابات (Sidebar Navigation) =====
@@ -30,6 +114,9 @@ document.querySelectorAll('.sidebar a').forEach(link => {
         else if(tab==='products') loadProducts();
         else if(tab==='users') loadUsers();
         else if(tab==='reports') loadReports();
+        else if(tab==='analytics') {
+    // مفيش حاجة نعملها لأنه iframe جاهز
+};
     });
 });
 
@@ -38,45 +125,40 @@ document.querySelectorAll('.sidebar a').forEach(link => {
 //  تحميل الطلبات من السيرفر
 // =========================
 function loadOrders(){
-    fetch('orders/orders.php') // API جلب الأوردرات
+    fetch('orders/orders.php')
     .then(res => res.json())
     .then(data => {
 
-        // مكان عرض البيانات
         if(data.length === 0){
-            document.getElementById('orders').innerHTML = "<p>No orders yet...</p>";
+            document.getElementById('orders').innerHTML = `<p>${t('no_orders')}</p>`;
             return;
         }
 
-        // بناء جدول HTML للأوردرات
         let html = `
         <table>
         <tr>
-            <th>ID</th>
-            <th>Order Number</th>
-            <th>User</th>
-            <th>Table</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Items</th>
+            <th>${t('id','orders')}</th>
+            <th>${t('order_number','orders')}</th>
+            <th>${t('user','orders')}</th>
+            <th>${t('table','orders')}</th>
+            <th>${t('total','orders')}</th>
+            <th>${t('status','orders')}</th>
+            <th>${t('date','orders')}</th>
+            <th>${t('items','orders')}</th>
         </tr>
         `;
 
-        // المرور على كل أوردر
         data.forEach(o => {
             html += `
             <tr>
                 <td>${o.order_id}</td>
                 <td>${o.order_number}</td>
                 <td>${o.user_name}</td>
-                <td>${o.table_number ? o.table_number : '-'}</td>
+                <td>${o.table_number ?? '-'}</td>
                 <td>${o.total_amount}</td>
                 <td>${o.status}</td>
                 <td>${o.created_at}</td>
-
-                <!-- عرض المنتجات داخل الأوردر -->
-                <td class="items">
+                <td>
                     ${o.items.map(i => `${i.product_name} (${i.quantity})`).join(", ")}
                 </td>
             </tr>
@@ -85,7 +167,6 @@ function loadOrders(){
 
         html += "</table>";
 
-        // عرض الجدول في الصفحة
         document.getElementById('orders').innerHTML = html;
     });
 }
@@ -100,9 +181,18 @@ function loadUsers(){
     .then(data => {
 
         let html = `
-        <button class="btn btn-primary" onclick="openUserModal()">Add User</button>
+        <button class="btn btn-primary" onclick="openUserModal()">
+            ${t('add_user')}
+        </button>
+
         <table>
-            <tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr>`;
+            <tr>
+                <th>#</th>
+                <th>${t('name')}</th>
+                <th>${t('email')}</th>
+                <th>${t('role')}</th>
+                <th>${t('action')}</th>
+            </tr>`;
 
         data.forEach(u => {
             html += `<tr>
@@ -111,23 +201,23 @@ function loadUsers(){
                 <td>${u.email}</td>
                 <td>${u.role}</td>
 
-                <!-- أزرار تعديل / حذف -->
                 <td>
                     <button class="btn btn-primary"
                         onclick="openUserModal(${u.id}, '${encodeURIComponent(u.name)}', '${encodeURIComponent(u.email)}', '${u.role}', '********')">
-                        Edit
+                        ${t('edit')}
                     </button>
-                    <button class="btn btn-danger" onclick="deleteUser(${u.id})">Delete</button>
+
+                    <button class="btn btn-danger" onclick="deleteUser(${u.id})">
+                        ${t('delete')}
+                    </button>
                 </td>
             </tr>`;
         });
 
         html += '</table>';
-
         document.getElementById('users').innerHTML = html;
     });
 }
-
 
 // =========================
 //  User Modal (فتح / إغلاق)
@@ -140,7 +230,7 @@ function openUserModal(id='', name='', email='', role='customer', password=''){
     document.getElementById('user_role').value = role;
 
     // تغيير العنوان حسب Add / Edit
-    document.getElementById('userModalTitle').innerText = id ? 'Edit User' : 'Add User';
+    document.getElementById('userModalTitle').innerText = id ? t('edit_user') : t('add_user');
 
     openModal('userModal');
 }
@@ -174,7 +264,7 @@ document.getElementById('userForm').onsubmit = function(e){
 //  حذف مستخدم
 // =========================
 function deleteUser(id){
-    if(confirm('Are you sure to delete this user?')){
+    if(confirm(t('confirm_delete_user'))){
 
         let formData = new FormData();
         formData.append('user_id', id);
@@ -198,22 +288,33 @@ function loadTables(){
     .then(data => {
 
         let html = `
-        <button class="btn btn-primary" onclick="openTableModal()">Add Table</button>
-        <table>
-            <tr><th>#</th><th>Number</th><th>Status</th><th>Action</th></tr>`;
+        <button class="btn btn-primary" onclick="openTableModal()">
+            ${t('add_table')}
+        </button>
 
-        data.forEach(t => {
+        <table>
+            <tr>
+                <th>#</th>
+                <th>${t('table_number')}</th>
+                <th>${t('status')}</th>
+                <th>${t('action')}</th>
+            </tr>`;
+
+        data.forEach(ti => {
             html += `<tr>
-                <td>${t.id}</td>
-                <td>${t.table_number}</td>
-                <td>${t.status}</td>
+                <td>${ti.id}</td>
+                <td>${ti.table_number}</td>
+                <td>${ti.status}</td>
 
                 <td>
                     <button class="btn btn-primary"
-                        onclick="openTableModal(${t.id},${t.table_number},'${t.status}')">
-                        Edit
+                        onclick="openTableModal(${ti.id},${ti.table_number},'${ti.status}')">
+                        ${t('edit')}
                     </button>
-                    <button class="btn btn-danger" onclick="deleteTable(${t.id})">Delete</button>
+
+                    <button class="btn btn-danger" onclick="deleteTable(${ti.id})">
+                        ${t('delete')}
+                    </button>
                 </td>
             </tr>`;
         });
@@ -227,12 +328,16 @@ function loadTables(){
 // =========================
 //  Table Modal
 // =========================
-function openTableModal(id='', number='', status='available'){
-    document.getElementById('table_id').value = id;
-    document.getElementById('table_number').value = number;
-    document.getElementById('table_status').value = status;
+function openTableModal(id='', number='', status='available') {
 
-    document.getElementById('tableModalTitle').innerText = id ? 'Edit Table' : 'Add Table';
+    document.getElementById('table_id').value = id || '';
+    document.getElementById('table_number').value = number || '';
+    document.getElementById('table_status').value = status || 'available';
+
+    const title = document.getElementById('tableModalTitle');
+    if (title) {
+        title.innerText = id ? t('edit_table') : t('add_table');
+    }
 
     openModal('tableModal');
 }
@@ -266,7 +371,7 @@ document.getElementById('tableForm').onsubmit = function(e){
 //  حذف طاولة
 // =========================
 function deleteTable(id){
-    if(confirm('Are you sure to delete this table?')){
+    if(confirm(t('confirm_delete_table'))){
         let formData = new FormData();
         formData.append('table_id', id);
 
@@ -289,9 +394,18 @@ function loadProducts(){
     .then(data => {
 
         let html = `
-        <button class="btn btn-primary" onclick="openProductModal()">Add Product</button>
+        <button class="btn btn-primary" onclick="openProductModal()">
+            ${t('add_product')}
+        </button>
+
         <table>
-            <tr><th>#</th><th>Name</th><th>Price</th><th>Description</th><th>Action</th></tr>`;
+            <tr>
+                <th>#</th>
+                <th>${t('name')}</th>
+                <th>${t('price')}</th>
+                <th>${t('description')}</th>
+                <th>${t('action')}</th>
+            </tr>`;
 
         data.forEach(p => {
             html += `<tr>
@@ -303,12 +417,16 @@ function loadProducts(){
                 <td>
                     <button class="btn btn-primary"
                         onclick="openProductModal(${p.id},'${p.name}',${p.price},'${p.description}',${p.stock_quantity},${p.category_id})">
-                        Edit
+                        ${t('edit')}
                     </button>
 
-                    <button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+                    <button class="btn btn-danger" onclick="deleteProduct(${p.id})">
+                        ${t('delete')}
+                    </button>
 
-                    <button class="btn btn-primary" onclick="openFlavors(${p.id})">Flavors</button>
+                    <button class="btn btn-primary" onclick="openFlavors(${p.id})">
+                        ${t('flavor')}
+                    </button>
                 </td>
             </tr>`;
         });
@@ -323,14 +441,21 @@ function loadProducts(){
 //  Product Modal
 // =========================
 function openProductModal(id='', name='', price='', description='', stock='', category=''){
-    document.getElementById('product_id').value = id;
+    document.getElementById('product_id').value = id || '';
     document.getElementById('product_name').value = name || '';
-    document.getElementById('product_price').value = price || 0;
-    document.getElementById('product_description').value = description || '';
-    document.getElementById('product_stock').value = stock || 0;
-    document.getElementById('product_category').value = category || '';
+    document.getElementById('product_price').value = price || '';
+    
+    const desc = document.getElementById('product_description');
+    if(desc) desc.value = description || '';
 
-    document.getElementById('productModalTitle').innerText = id ? 'Edit Product' : 'Add Product';
+    const st = document.getElementById('product_stock');
+    if(st) st.value = stock || '';
+
+    const cat = document.getElementById('product_category');
+    if(cat) cat.value = category || '';
+
+    document.getElementById('productModalTitle').innerText =
+        id ? t('edit_product') : t('add_product');
 
     openModal('productModal');
 }
@@ -349,10 +474,14 @@ document.getElementById('productForm').onsubmit = function(e){
     let formData = new FormData(this);
 
     fetch('products/save_product.php',{method:'POST', body:formData})
-    .then(res => res.json())
+    .then(async res => {
+    const text = await res.text();
+    console.log(text); // 👈 ده هيكشف المشكلة الحقيقية
+    return JSON.parse(text);
+})
     .then(data => {
         if(data.success){
-            alert(data.message || "Product saved successfully");
+            alert(data.message || "تم حفظ المنتج بنجاح");
             closeProductModal();
             loadProducts();
         } else {
@@ -366,7 +495,7 @@ document.getElementById('productForm').onsubmit = function(e){
 //  حذف منتج
 // =========================
 function deleteProduct(id){
-    if(confirm('Are you sure to delete this product?')){
+    if(confirm(t('confirm_delete_product'))){
 
         let formData = new FormData();
         formData.append('product_id',id);
@@ -390,17 +519,25 @@ function loadReports(){
     .then(data => {
 
         if(data.length === 0){
-            document.getElementById('reports').innerHTML = '<p>No messages yet...</p>';
+            document.getElementById('reports').innerHTML = '<p>لا توجد رسائل حتى الآن...</p>';
             return;
         }
 
-        let html = `<table>
-<tr><th>#</th><th>Name</th><th>Email</th><th>Message</th><th>Date</th></tr>`;
+        let html = `
+<table>
+<tr>
+    <th>${t('id','messages')}</th>
+    <th>${t('name','messages')}</th>
+    <th>${t('email','messages')}</th>
+    <th>${t('message','messages')}</th>
+    <th>${t('date','messages')}</th>
+</tr>
+`;
 
         data.forEach(r => {
             html += `<tr>
 <td>${r.id}</td>
-<td>${r.first_name} ${r.last_name}</td>
+<td>${r.name ?? (r.first_name + " " + r.last_name)}</td>
 <td>${r.email}</td>
 <td>${r.message}</td>
 <td>${r.created_at}</td>
@@ -418,62 +555,92 @@ function loadReports(){
 // =========================
 setInterval(() => {
 
-    let activeTab = document.querySelector('.sidebar a.active').getAttribute('data-tab');
+    let activeLink = document.querySelector('.sidebar a.active');
+    if(!activeLink) return;
 
-    if(activeTab === 'users') loadUsers();
-    else if(activeTab === 'products') loadProducts();
-    else if(activeTab === 'tables') loadTables();
-    else if(activeTab === 'orders') loadOrders();
+    let tab = activeLink.dataset.tab;
 
-}, 7000);
+    if(tab === 'orders') loadOrders();
+    else if(tab === 'users') loadUsers();
+    else if(tab === 'tables') loadTables();
+
+    // ❌ بلاش products auto refresh
+    // لأنها فيها flavors و heavy
+
+}, 10000);
 
 
 // =========================
 //  Flavors System
 // =========================
+let modalBusy = false;
+
 function openFlavors(product_id){
     document.getElementById("flavor_product_id").value = product_id;
-    document.getElementById("flavorModal").style.display = "grid";
+    openModal('flavorModal');
     loadFlavors(product_id);
 }
 
+let flavorLoading = false;
+
 function loadFlavors(product_id){
 
-    if(document.getElementById("flavorModal").style.display === "none") return;
+    if(flavorLoading) return;
+    flavorLoading = true;
 
-    fetch("flavors/flavors.php?product_id="+product_id)
-    .then(res => res.json())
+    fetch("flavors/flavors.php?product_id=" + product_id)
+    .then(async res => {
+    const text = await res.text();
+    console.log(text); // 👈 ده هيكشف المشكلة الحقيقية
+    return JSON.parse(text);
+})
     .then(data => {
 
-        let html = `<table>
-<tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Action</th></tr>`;
+        const list = document.getElementById("flavorsList");
+        if(!list) return;
 
-        data.forEach(f=>{
-            html += `<tr>
-<td>${f.flavor_id}</td>
-<td>${f.flavor_name}</td>
-<td>${f.price}</td>
-<td>${f.stock_quantity}</td>
-<td>
-<button onclick="openFlavorModal(${f.flavor_id},'${f.flavor_name}','${f.price}','${f.stock_quantity}','${f.image}')">Edit</button>
-<button onclick="deleteFlavor(${f.flavor_id})">Delete</button>
-</td>
-</tr>`;
-        });
+        let html = `
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>الاسم</th>
+                <th>السعر</th>
+                <th>المخزون</th>
+                <th>الإجراء</th>
+            </tr>
+        `;
 
-        html += "</table>";
+        data.forEach(f => {
+    html += `
+    <tr>
+        <td>${f.flavor_id}</td>
+        <td>${f.flavor_name}</td>
+        <td>${f.price}</td>
+        <td>${f.stock_quantity}</td>
+        <td>
+            <button 
+                onclick="openFlavorModal(
+                    ${f.flavor_id},
+                    '${f.flavor_name.replace(/'/g, "\\'")}',
+                    ${f.price},
+                    ${f.stock_quantity}
+                )">
+                Edit
+            </button>
 
-        document.getElementById("flavorsList").innerHTML = html;
+            <button onclick="deleteFlavor(${f.flavor_id})">
+                Delete
+            </button>
+        </td>
+    </tr>
+    `;
+});
 
-        let dropdown = `<select id="flavor_select_${product_id}">`;
-
-        data.forEach(f=>{
-            dropdown += `<option value="${f.flavor_id}">${f.flavor_name} - $${f.price}</option>`;
-        });
-
-        dropdown += `</select>`;
-
-        document.getElementById("flavorDropdownContainer").innerHTML = dropdown;
+        html += `</table>`;
+        list.innerHTML = html;
+    })
+    .finally(() => {
+        flavorLoading = false;
     });
 }
 
@@ -493,7 +660,7 @@ document.getElementById("flavorForm").onsubmit = function(e){
     .then(res => res.json())
     .then(data => {
         if(data.success){
-            alert(data.message || "Flavor saved successfully");
+            alert(data.message || "تم حفظ النكهة بنجاح");
             let product_id = document.getElementById("flavor_product_id").value;
             loadFlavors(product_id);
             closeFlavorModal();
@@ -509,7 +676,7 @@ document.getElementById("flavorForm").onsubmit = function(e){
 // =========================
 function deleteFlavor(id){
 
-    if(confirm("Delete this flavor?")){
+    if(confirm(t('confirm_delete_product'))){
 
         let formData = new FormData();
         formData.append("flavor_id",id);
@@ -532,13 +699,20 @@ function deleteFlavor(id){
 // =========================
 // فتح / تعديل flavor
 // =========================
-function openFlavorModal(id='', name='', price='', stock='', image=''){
-    document.getElementById('flavor_id').value = id;
-    document.getElementById('flavor_name').value = name || '';
-    document.getElementById('flavor_price').value = price || 0;
-    document.getElementById('flavor_stock_quantity').value = stock || 0;
+function openFlavorModal(id='', name='', price='', stock=''){
 
-    document.getElementById('flavorModalTitle').innerText = id ? 'Edit Flavor' : 'Add Flavor';
+    const set = (id, val) => {
+        const el = document.getElementById(id);
+        if(el) el.value = val ?? '';
+    };
+
+    set('flavor_id', id);
+    set('flavor_name', name);
+    set('flavor_price', price);
+    set('flavor_stock_quantity', stock);
+
+    document.getElementById('flavorModalTitle').innerText =
+        id ? 'تعديل نكهة' : 'إضافة نكهة';
 
     openModal('flavorModal');
 }
@@ -576,3 +750,30 @@ function closeModal(modalId){
         modal.style.display = 'none';
     }, 300);
 }
+function t(key){
+    return trans[LANG]?.[key] ?? key;
+}
+function exportExcel(){
+    let from = document.getElementById("from_date").value;
+    let to = document.getElementById("to_date").value;
+
+    window.open(`export_orders.php?from=${from}&to=${to}`);
+}
+
+function exportPDF(){
+    let from = document.getElementById("from_date").value;
+    let to = document.getElementById("to_date").value;
+
+    window.open(`export_orders_pdf.php?from=${from}&to=${to}`);
+}
+document.addEventListener('click', function(e){
+    const btn = e.target.closest('.edit-flavor');
+    if(!btn) return;
+
+    openFlavorModal(
+        btn.dataset.id,
+        btn.dataset.name,
+        btn.dataset.price,
+        btn.dataset.stock
+    );
+});

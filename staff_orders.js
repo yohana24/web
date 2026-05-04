@@ -1,46 +1,36 @@
+
 let isLoadingOrders = false;
 
-// ===== متغير حماية =====
-// الهدف منه منع تكرار طلبات الفتش لو فيه request شغال بالفعل
-// (علشان مايحصلش ضغط على السيرفر أو تكرار البيانات)
+// ======================
+// تحميل الطلبات
+// ======================
 function loadOrders(){
 
-    // لو فيه تحميل شغال بالفعل، نوقف التنفيذ
     if(isLoadingOrders) return;
-
-    // نعلم إن فيه عملية تحميل بدأت
     isLoadingOrders = true;
 
-    // ===== جلب الطلبات من السيرفر (Backend API) =====
     fetch('get_orders_staff.php')
     .then(res => res.json())
     .then(data => {
 
-        // ===== عنصر عرض الأوردرات في الصفحة =====
         const container = document.getElementById("ordersContainer");
 
-        // لو مفيش بيانات من الداتا بيز
         if(!data || data.length === 0){
-            container.innerHTML = "<p class='text-center text-muted'>No orders yet.</p>";
+            container.innerHTML = "<p class='text-center text-muted'>لا توجد طلبات بعد.</p>";
             return;
         }
 
-        // ===== بناء HTML لكل الأوردرات =====
         container.innerHTML = data.map(order => {
 
-            // إضافة كلاس حسب حالة الأوردر (pending / completed etc)
             const statusClass = "status-" + (order.status || "").toLowerCase();
 
             let itemsHTML = "";
 
-            // ===== عرض عناصر كل أوردر (المنتجات) =====
             if(order.items && order.items.length > 0){
-
                 itemsHTML = "<ul>";
 
                 order.items.forEach(item => {
 
-                    // حساب subtotal لكل منتج (price * quantity)
                     const subtotal = parseFloat(item.subtotal || (item.price * item.quantity));
 
                     itemsHTML += `
@@ -48,7 +38,6 @@ function loadOrders(){
                             ${item.product_name} x ${item.quantity}
                             - ${subtotal.toFixed(2)} EGP
 
-                            // ملاحظة لو فيه نوت للمستخدم على المنتج
                             ${item.note ? `<div class="item-note">${item.note}</div>` : ""}
                         </li>
                     `;
@@ -57,50 +46,57 @@ function loadOrders(){
                 itemsHTML += "</ul>";
             }
 
-            // ===== زرار تغيير حالة الأوردر =====
+            // ======================
+            // زر واحد (تأكيد + واتس)
+            // ======================
             let actionButton = "";
 
-            // لو الأوردر مش مكتمل
             if(order.status !== "Completed"){
-                actionButton = `<button class="action-btn" onclick="completeOrder(${order.order_id})">Mark Completed</button>`;
-            } else {
-                actionButton = `<span class="order-status status-completed">✔ Completed</span>`;
+
+    actionButton = `
+        <button class="action-btn"
+            onclick='completeAndNotify(
+                ${order.order_id},
+                ${JSON.stringify(order.phone || "")},
+                ${JSON.stringify(order.order_number)},
+                ${JSON.stringify(order.customer_name || "")},
+                ${JSON.stringify(order.items || [])}
+            )'>
+            ✔ تأكيد + واتس
+        </button>
+    `;
+} else {
+                actionButton = `<span class="order-status status-completed">✔ مكتمل</span>`;
             }
 
-            // ===== تصميم كارت الأوردر =====
             return `
                 <div class="order-card">
 
                     <div class="order-header">
 
                         <div>
-                            <span class="order-number">Order #${order.order_number}</span>
+                            <span class="order-number">طلب رقم #${order.order_number}</span>
 
-                            <!-- تحديد هل الأوردر على طاولة ولا Takeaway -->
                             <div class="customer-name">
-                                ${order.table_number ? "Table #" + order.table_number : "Takeaway"}
-                                - ${order.customer_name} placed this order
+                                ${order.table_number ? "طاولة رقم " + order.table_number : "سفري"}
+                                - ${order.customer_name} قام بإنشاء هذا الطلب
                             </div>
                         </div>
 
-                        <!-- حالة الأوردر -->
                         <span class="order-status ${statusClass}">
                             ${order.status}
                         </span>
 
                     </div>
 
-                    <!-- تفاصيل المنتجات -->
                     <div class="order-details">
                         ${itemsHTML}
                     </div>
 
-                    <!-- إجمالي السعر -->
                     <div class="total">
-                        Total: ${parseFloat(order.total_amount || 0).toFixed(2)} EGP
+                        الإجمالي: ${parseFloat(order.total_amount || 0).toFixed(2)} EGP
                     </div>
 
-                    <!-- زر التحكم -->
                     ${actionButton}
 
                 </div>
@@ -108,17 +104,18 @@ function loadOrders(){
         }).join("");
 
     })
-    .catch(err => console.error("Error loading orders:", err))
+    .catch(err => console.error("خطأ في تحميل الطلبات:", err))
 
-    // ===== إعادة فتح التحميل بعد ما العملية تخلص =====
     .finally(() => {
         isLoadingOrders = false;
     });
 }
 
 
-// ===== تغيير حالة الأوردر إلى Completed =====
-function completeOrder(orderId){
+// ======================
+// تأكيد + واتساب
+// ======================
+function completeAndNotify(orderId, phone, orderNumber, customerName, items){
 
     fetch('update_order.php', {
         method: 'POST',
@@ -128,59 +125,52 @@ function completeOrder(orderId){
     .then(res => res.json())
     .then(data => {
 
-        // لو التحديث نجح نعيد تحميل البيانات
         if(data.success){
+
+            let cleanPhone = (phone || "").replace(/\D/g, "");
+
+            if(cleanPhone.startsWith("0")){
+                cleanPhone = "20" + cleanPhone.substring(1);
+            }
+
+            // ===== بناء تفاصيل الطلب =====
+            let orderItemsText = "";
+
+            if(items && items.length > 0){
+                orderItemsText = items
+                    .map(item => `- ${item.product_name} x ${item.quantity}`)
+                    .join("\n");
+            } else {
+                orderItemsText = "لا توجد تفاصيل";
+            }
+
+            // ===== الرسالة النهائية =====
+            let msg = `أهلاً ${customerName}
+
+رقم الطلب: ${orderNumber}
+
+تفاصيل الطلب:
+${orderItemsText}
+
+الطلب جاهز للاستلام
+
+شكراً لطلبك`;
+
+            let url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+
+            window.open(url, "_blank");
+
             loadOrders();
+
         } else {
-            alert("Error updating order");
+            alert("خطأ في تحديث الطلب");
         }
     });
 }
 
-
-// ===== أول تحميل للصفحة =====
+// ======================
+// أول تحميل
+// ======================
 loadOrders();
 
-// ===== تحديث تلقائي كل 8 ثواني =====
 setInterval(loadOrders, 8000);
-
-
-// ===== Scroll Progress Indicator =====
-let scrollProgress = document.getElementById("progress");
-
-// دالة حساب نسبة السكرول في الصفحة
-let calcScrollValue = () => {
-
-    if(!scrollProgress) return;
-
-    // مكان السكرول الحالي
-    let pos = document.documentElement.scrollTop;
-
-    // إجمالي طول الصفحة
-    let calcHeight =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-
-    // حساب نسبة السكرول %
-    let scrollValue = Math.round((pos * 100) / calcHeight);
-
-    // إظهار أو إخفاء زر الرجوع لأعلى
-    if (pos > 100) {
-        scrollProgress.style.display = "grid";
-    } else {
-        scrollProgress.style.display = "none";
-    }
-
-    // عند الضغط يرجع لأعلى الصفحة
-    scrollProgress.onclick = () => {
-        document.documentElement.scrollTop = 0;
-    };
-
-    // شكل الدايرة (progress circle)
-    scrollProgress.style.background =
-        `conic-gradient(#333 ${scrollValue}%, #d7d7d7 ${scrollValue}%)`;
-};
-
-// تشغيل السكرول
-window.onscroll = calcScrollValue;
-window.onload = calcScrollValue;

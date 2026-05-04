@@ -1,11 +1,7 @@
 <?php
-include '../db.php'; 
-// الاتصال بقاعدة البيانات
+include '../db.php';
+include '../auth_check.php';
 
-include '../auth_check.php'; 
-// التأكد إن المستخدم عنده صلاحية يدخل الصفحة
-
-// ===== جلب كل الأوردرات من الداتابيز =====
 $result = $conn->query("
     SELECT 
         orders.order_id,
@@ -21,12 +17,10 @@ $result = $conn->query("
     ORDER BY orders.created_at DESC
 ");
 
-// مصفوفة لتجميع كل الأوردرات
 $orders = [];
 
 while($row = $result->fetch_assoc()){
 
-    // ===== جلب المنتجات الخاصة بكل أوردر =====
     $items_result = $conn->query("
         SELECT p.name AS product_name, oi.quantity
         FROM order_items oi
@@ -36,18 +30,13 @@ while($row = $result->fetch_assoc()){
 
     $items = [];
 
-    // تحويل المنتجات لمصفوفة
     while($item = $items_result->fetch_assoc()){
         $items[] = $item;
     }
 
-    // إضافة المنتجات داخل الأوردر نفسه
     $row['items'] = $items;
-
-    // إضافة الأوردر للقائمة النهائية
     $orders[] = $row;
 }
 
-// إرسال كل الأوردرات للـ frontend في شكل JSON
 echo json_encode($orders);
 ?>

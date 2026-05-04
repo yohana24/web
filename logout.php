@@ -5,6 +5,6 @@ session_start(); // بدء الـ session علشان نقدر نمسحها
 session_destroy();
 
 // تحويل المستخدم لصفحة تسجيل الدخول بعد الخروج
-header("Location: index.php");
+header("Location: welcome.php");
 exit; // إيقاف تنفيذ أي كود بعد التحويل
 ?>

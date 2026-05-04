@@ -21,172 +21,6 @@ background-repeat:no-repeat;
 header{
     padding: 1.5rem 0;
 }
-
-/* ===== nav ===== */
-nav{
-    width: 100%;
-    padding: 1rem 5%;
-    margin-bottom: 2rem;
-    border-radius: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-}
-
-/* ===== Logo ===== */
-.logo{
-    font-size: 1rem;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 1px;
-}
-
-/* ===== Navigation Links ===== */
-.nav-links{
-    list-style: none;
-    display: flex;
-    gap: 1rem;
-}
-
-/* ===== Navigation Links a (home,menu,about,contact,my orders) ===== */
-.nav-links li a{
-    position: relative;
-    font-size: 1rem;
-    font-weight: 500;
-    text-decoration: none;
-    color: #e2e8f0;
-    transition: 0.3s;
-    padding: 1rem;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    gap: 1.5rem;
-}
-
-.nav-links li a:hover{
-    color: #e0a2ed;
-    text-shadow: 
-        0 0 5px #ff3cac,
-        0 0 10px #ff3cac,
-        0 0 20px #e2e8f0;
-}
-
-/* ===== Logout Link ===== */
-.li{
-    list-style: none;
-    display: flex;
-    gap: 1.5rem; 
-}
-.li a{
-    list-style: none;
-    position: relative;
-    font-size: 1rem;
-    font-weight: 500;
-    text-decoration: none;
-    color: #e2e8f0;
-    transition: 0.3s;
-    padding: 1rem;
-    display: flex;
-    gap: 1.5rem; 
-}
-.li a:hover{
-    color: #e0a2ed;
-    text-shadow: 
-        0 0 5px #ff3cac,
-        0 0 10px #ff3cac,
-        0 0 20px #e2e8f0;
-}
-
-/* ===== Search Box ===== */
-.search{
-    background-color: #e2e8f0;
-    position: relative;
-    display: flex;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 1rem rgba(0, 0, 0, .1);
-}
-.search_icon{
-    position: absolute;
-    padding: .6rem 1rem;
-    font-size: 1rem;
-    color:#000000;
-}
-.search_input{
-    padding: .6rem 1.2rem;
-    padding-left: 1.8rem;
-    font-size: 1rem;
-    border: none;
-    z-index: 1;
-    background-color: transparent;
-    width: 0;
-    transition: all .4s cubic-bezier(0.075, 0.82, 0.165,1);
-}
-.search_input:focus{
-    outline: none;
-    padding-left: 3.2rem;
-    width: 16rem;
-}
-
-/* ===== Cart Icon ===== */
-.cart{
-    position: relative;
-    font-size: 26px;   
-    color: white;
-    cursor: pointer;
-}
-.cart i{
-    display: block;
-}
-#cartCount{
-    position: absolute;
-    top: -6px;
-    right: -8px;
-    background: #ff4dff;
-    color: white;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 50%;
-    font-weight: bold;
-    box-shadow: 0 0 8px #ff3cac, 0 0 12px #ff3cac55;
-}
-
-/* ===== Cart Popup ===== */
-.cart-popup{
-    position: fixed;
-    top: 70px;
-    right: 20px;
-    width: 280px;
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(12px);
-    border-radius: 15px;
-    padding: 15px;
-    color: white;
-    display: none;
-    box-shadow: 0 0 25px rgba(255,255,255,0.2);
-    align-items: center;
-    text-align: center;
-}
-.cart-popup h3{
-    margin-bottom: 10px;
-    text-align: center;
-}
-.cart-popup ul{
-    list-style: none;
-    padding: 0;
-    max-height: 200px;
-    overflow-y: auto;
-}
-.cart-popup li{
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    padding-bottom: 5px;
-}
-
     /* The Name */
 .title {
     font-family: 'Tilt Warp', cursive;
@@ -194,8 +28,8 @@ nav{
     color: #fff;
     text-align: center;
     position: absolute;
-    left: 10%;
-    margin-top: 60px;
+    left: 15%;
+    margin-top: 120px;
     text-shadow: 
         0 0 5px #ff3cac,
         0 0 10px #ff3cac,
@@ -245,8 +79,8 @@ p {
     justify-content:center;
     align-items:center;
     position:relative;
-    left: 40%;
-    top: 50px;
+    left: 45%;
+    top: 180px;
 }
 
 /* FRAME */
